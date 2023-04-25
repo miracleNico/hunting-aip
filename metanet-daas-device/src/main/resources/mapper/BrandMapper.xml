@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.BrandMapper">
+
+	<update id="removeBrand">
+		update t_brand set status=false 
+		where brand_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.brandId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getBrand" resultType="work.metanet.model.Brand">
+		select * from t_brand where status=true and brand_name=#{brandName}
+	</select>
+	
+	<select id="brandInfo" resultType="work.metanet.api.brand.protocol.ReqBrandInfo$RespBrandInfo">
+		select
+			bd.brand_id,
+			bd.brand_name,
+			bd.remark,
+			bd.source,
+			DATE_FORMAT(bd.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_brand bd
+		where 1=1
+			and bd.`status`=true
+			and bd.brand_id=#{brandId}
+	</select>
+	
+	<select id="brandList" resultType="work.metanet.api.brand.protocol.ReqBrandList$RespBrandList">
+		select
+			bd.brand_id,
+			bd.brand_name,
+			bd.remark,
+			bd.source,
+			DATE_FORMAT(bd.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_brand bd
+		where bd.`status`=true
+			<if test="brand!=null and brand!=''">
+				and (bd.brand_id like CONCAT('%',#{brand},'%') or bd.brand_name  like CONCAT('%',#{brand},'%'))			
+			</if>
+			<if test="source!=null and source!=''">
+				and bd.source=#{source}
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(bd.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(bd.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and bd.remark like CONCAT('%',#{remark},'%')
+			</if>
+		order by bd.brand_id desc
+	</select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">生成数量</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="snCodeNum" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  </div>
+    <div class="layui-form-item">
+    	<div class="layui-inline">
+			<label class="layui-form-label">产品</label>
+		    <div class="layui-input-inline">
+		      	<select name="appId" lay-search="" lay-verify="required" lay-reqtext="产品是必选项，岂能为空？">
+		           	<option value=""></option>
+		       	</select>
+		    </div>
+	  	</div>
+	  	<div class="layui-inline">
+	 		<label class="layui-form-label">使用次数</label>
+		    <div class="layui-input-inline">
+		      <input type="text" name="maxUseNumber" value="1" autocomplete="off" class="layui-input" placeholder="限定使用次数" lay-verify="required" lay-reqtext="使用次数是必填项，岂能为空？">
+		    </div>
+	  	</div>
+    </div>
+    
+  <div class="layui-form-item">
+ 	<div class="layui-inline">
+ 		<label class="layui-form-label">SN码</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="snCode" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate;
+	
+	load_app();
+	init_data();
+	
+	
+	function init_data(){
+		$('input[name="snCode"]').val(initData.snCode);
+		$('input[name="maxUseNumber"]').val(initData.maxUseNumber);
+		$('textarea[name="remark"]').val(initData.remark);
+		if($.isEmptyObject(initData.snCode)){
+			//新增操作
+			$('input[name="snCode"]').parents('.layui-inline').remove();
+		}else{
+			//修改操作
+			$('input[name="snCode"]').addClass('layui-disabled');
+			$('input[name="snCode"]').attr('disabled','disabled');
+			$('input[name="snCodeNum"]').parents('.layui-inline').remove();
+			$('button[type="reset"]').hide();
+		}
+		form.render();
+	}
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+        $.ajax({
+			url : 'sn/saveSerialNumber',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+    
+    
+    function load_app(){
+  		$.ajax({
+  			url : 'app/appSelected',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'pageSize':100}),
+  			success : function(res) {
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="appId"] option:first').clone(true);
+  						option.val(x.appId);
+  						option.text(x.appName);
+  						$('select[name="appId"]').append(option);
+  					});
+  					$('select[name="appId"]').val(initData.appId);
+  					form.render();
+  				}
+  			}
+  		});
+  	}
+	
+	
+}();
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px">
+        <form class="layui-form layui-form-pane" action="">
+        	<div class="layui-form-item">
+        		<div class="layui-inline">
+                    <label class="layui-form-label">渠道</label>
+                    <div class="layui-input-inline">
+                        <select name="channelId" lay-filter="channelId" lay-search="">
+				             <option value=""></option>
+				         </select>
+                    </div>
+                </div>
+        	</div>
+        	<div class="layui-form-item">
+        		<div class="layui-inline">
+                    <label class="layui-form-label">应用</label>
+                    <div class="layui-input-inline">
+                         <select name="appId" lay-filter="appId" lay-search="">
+				             <option value=""></option>
+				         </select>
+                    </div>
+                </div>
+        		<div class="layui-inline">
+                    <label class="layui-form-label">设备ID</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="deviceId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+        	</div>
+        	<div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">序列号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="sn" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">MAC</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="mac" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+           </div>
+			<div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="startTime" id="startTime" autocomplete="off" class="layui-input" placeholder="认证时间">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="endTime" id="endTime" autocomplete="off" class="layui-input" placeholder="认证时间">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">启用状态</label>
+                    <div class="layui-input-inline">
+                        <select name="enable" lay-search="">
+                            <option value=""></option>
+                            <option value="false">禁用</option>
+                            <option value="true">启用</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="remark" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</fieldset>
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+
+
+<script type="text/html" id="tableToolbar">
+  <div class="layui-btn-container">
+    <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius layui-btn-danger" lay-event="tableDataRemove" _permission="openDevice:remove">删除</button>
+  </div>
+</script>
+
+<script type="text/html" id="tableRowBar">
+	<a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius data-count-edit" lay-event="tableRowEdit" _permission="openDevice:edit">修改</a>
+	<a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius layui-btn-danger data-count-delete" lay-event="tableRowRemove" _permission="openDevice:remove">删除</a>
+</script>
+
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate,upload = layui.upload;
+	
+	//日期
+    laydate.render({
+        elem: '#startTime'
+    });
+    laydate.render({
+        elem: '#endTime'
+    });
+	
+	load_channel();
+	
+	//监听选中事件
+	form.on('select(channelId)', function(){
+		load_app();
+	});
+	
+	table.render({
+	    elem: '#tableData'
+	    ,method:'post'
+	    ,contentType:'application/json;charset=utf-8'
+	    ,url:'openDevice/deviceList'
+		,height: 550
+	    ,cols: [[
+	    	{type: 'checkbox', fixed: 'left'}
+	      ,{type: 'numbers',fixed: 'left'}
+	      ,{field:'openDeviceId', title:'主键',hide:true}
+	      ,{field:'deviceId', title:'设备ID',width:150}
+	      ,{field:'appName', title:'应用名称',width:120}
+	      ,{field:'channelName', title:'渠道名称',width:120}
+	      ,{field:'mac', title:'MAC',width:150}
+	      ,{field:'sn', title:'序列号',width:150}
+	      ,{field:'model', title:'型号',width:120}
+	      ,{field:'brand', title:'品牌',width:120}
+	      ,{field:'enable', title:'启用状态',width:100, align: "center", templet: function(d){
+	    	  return d.enable?'<span style="color: #5FB878;">启用</span>':'<span style="color: #FF5722;">禁用</span>';
+	      }}
+	      ,{field:'remark', title:'备注',width:130}
+	      ,{field:'createTime', title:'认证时间',width:160}
+	      ,{field:'updateTime', title:'修改时间',width:160}
+	      ,{title: '操作', width:120, fixed: "right", align: "center", templet: '#tableRowBar'}
+	    ]]
+    	,request: {
+    	    pageName: 'pageNum' //页码的参数名称，默认：page
+    	    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+    	  }
+	    ,response: {
+	      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+	    }
+	    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+	    	if(res.success){
+		      return {
+		        "code": res.code, //解析接口状态
+		        "msg": res.msg, //解析提示文本
+		        "count": res.data.total, //解析数据长度
+		        "data": res.data.list //解析数据列表
+		      };
+	    	}
+	    }
+	    ,page: true
+	    ,toolbar: '#tableToolbar' //开启头部工具栏，并为其绑定左侧模板
+	    ,done:function(res, curr, count){
+	    	permission();
+	    }
+	  });
+	
+	function load_channel(){
+		$.ajax({
+			url : 'channel/channelSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'pageSize':100}),
+			success : function(res) {
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="channelId"] option:first').clone(true);
+						option.val(x.channelId);
+						option.text(x.channelName);
+						$('select[name="channelId"]').append(option);
+					});
+					form.render();
+					load_app();
+				}
+			}
+		});
+	}
+	
+	
+	function load_app(){
+		var channelId = $('select[name="channelId"]').val();
+		$.ajax({
+			url : 'openApp/channelAppSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'channelId':channelId}),
+			success : function(res) {
+				$('select[name="appId"] option:first').nextAll().remove();
+				if(res.success){
+					$.each(res.data,function(i,x){
+						var option = $('select[name="appId"] option:first').clone(true);
+						option.val(x.appId);
+						option.text(x.appName);
+						$('select[name="appId"]').append(option);
+					});
+					form.render();
+				}
+			}
+		});
+	}
+	
+	  //监听搜索操作
+      form.on('submit(data-search-btn)', function (data) {
+          //执行搜索重载
+          table.reload('tableData', {
+              page: {curr: 1}
+              , where: data.field
+          }, 'data');
+      });
+	  
+	  
+      //头工具栏事件
+      table.on('toolbar(tableData)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var data = checkStatus.data;
+        switch(obj.event){
+          case 'tableDataRemove':
+        	  removeDevice(data);
+          break;
+        };
+      });
+      
+      //监听表格行操作事件
+      table.on('tool(tableData)', function (obj) {
+          var data = obj.data;
+          switch(obj.event){
+	          case 'tableRowEdit':
+	        	  openIframeEdit('修改',data.openDeviceId);
+	          break;
+	          case 'tableRowRemove':
+	        	  removeDevice(new Array(data));
+	          break;
+	      };
+      });
+	
+      
+      function openIframeEdit(title,openDeviceId){
+    	  openIframe(title,'openDevice/editPage?',openDeviceId);
+      }
+      
+      function openIframe(title,url,openDeviceId){
+    	  var param = '';
+    	  if(!$.isEmptyObject(openDeviceId)){
+    		  param += 'openDeviceId='+openDeviceId; 
+    	  }
+    	  layer.open({
+	   		  	type: 2, 
+	   		  	title: title+'设备信息',
+	   		  	content: [url+param],//no没有滚动条
+		   		shade: 0.5,
+		        maxmin: true, //开启最大化最小化按钮
+		        area: ['730px', '380px']
+	   		});
+      }
+      
+      
+      function removeDevice(data){
+    	  if(data.length<1){
+    		  layer.msg('请选择您要删除的数据');
+    		  return;
+    	  }
+    	  layer.prompt({title: '输入口令，并确认', formType: 2}, function(pass, index){
+    		  if(pass!=confirmPwd()) {
+    			  return layer.msg('口令不正确');
+    		  }layer.close(index);
+	    	  layer.confirm('确定要删除吗?',function(){
+		    	  $.ajax({
+		    			url : 'openDevice/removeDevice',
+		    			type : 'POST',
+		    			contentType : 'application/json;charset=utf-8',
+		    			dataType : 'json',
+		    			data:JSON.stringify(data),
+		    			success : function(res) {
+		    				if(res.success){
+			    				layer.msg(res.msg,table.reload('tableData'));	    					
+		    				}
+		    			}
+		    		});
+	    	  });
+    	  });
+      }
+	
+}();
+</script>
+</body>
+</html>

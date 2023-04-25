@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionTableMapper">
+
+	<select id="getVisionTableInfo" resultType="work.metanet.api.vision.protocol.ReqVisionTableInfo$RespVisionTableInfo">
+		select
+			vt.id,
+			vt.table_type,
+			vt.line_sn,
+			vt.distance,
+			vt.decimal_record,
+			vt.logarithm_record,
+			vt.sighting_mark_length,
+			vt.remark
+		from t_vision_table vt
+		where 1=1
+			and vt.line_sn=#{lineSn}
+			and vt.`status` = true
+		group by vt.line_sn
+	</select>
+</mapper>

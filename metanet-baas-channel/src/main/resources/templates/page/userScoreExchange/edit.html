@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">订单号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="orderNumber" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">快递单号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="courierNumber" placeholder="请输入快递单号" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  </div>  
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">发货状态</label>
+	    <div class="layui-input-inline">
+	         <select name="sendStatus" lay-search="" lay-verify="required" lay-reqtext="发货状态是必选项，岂能为空？" >
+	             <option value=""></option>
+	             <option value="NSEND">未发货</option>
+	             <option value="YSEND">已发货</option>
+	         </select>
+	    </div>
+    </div>
+  	<div class="layui-inline">
+        <label class="layui-form-label">发货时间</label>
+        <div class="layui-input-inline">
+            <input type="text" name="sendTime" id="sendTime" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate;
+	
+	//日期
+    laydate.render({
+        elem: '#sendTime'
+        ,type: 'datetime'
+    });
+	
+	init_data();
+	
+	function init_data(){
+		$('input[name="orderNumber"]').val(initData.orderNumber);
+		$('input[name="courierNumber"]').val(initData.courierNumber);
+		$('select[name="sendStatus"]').val(initData.sendStatus);
+		$('input[name="sendTime"]').val(initData.sendTime);
+		$('textarea[name="remark"]').val(initData.remark);
+		form.render();
+		if(!$.isEmptyObject(initData.userScoreExchangeId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	data.field['userScoreExchangeId'] = initData.userScoreExchangeId;
+        $.ajax({
+			url : 'userScoreExchange/saveUserScoreExchange',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+	
+	
+}();
+</script>
+</body>
+</html>

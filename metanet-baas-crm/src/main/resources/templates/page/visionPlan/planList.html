@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">用户ID</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="userId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">计划ID</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="planId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">计划名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="planName" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">提醒类型</label>
+                    <div class="layui-input-inline">
+                        <select name="planType" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">年提醒</option>
+                            <option value="1">月提醒</option>
+                            <option value="2">周提醒</option>
+                            <option value="3">天提醒</option>
+                            <option value="4">小时提醒</option>
+                            <option value="5">一次性提醒</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">执行模式</label>
+                    <div class="layui-input-inline">
+                        <select name="actionMode" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">状态栏提醒</option>
+                            <option value="1">弹出框提醒</option>
+                            <option value="2">立即强制切换</option>
+                            <option value="3">倒计时切换可取消</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">计划操作</label>
+                    <div class="layui-input-inline">
+                        <select name="planAction" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">视力测试</option>
+                            <option value="1">视力防护</option>
+                            <option value="2">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="startDate" id="startTime" autocomplete="off" class="layui-input"
+                               placeholder="开始时间">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="endDate" id="endTime" autocomplete="off" class="layui-input"
+                               placeholder="结束时间">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset">重置</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</fieldset>
+
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+<script type="text/html" id="tableToolbar">
+    <div class="layui-btn-container">
+        <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius" lay-event="tableDataAdd"
+                _permission="visionPlan:add">添加
+        </button>
+        <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius layui-btn-danger"
+                lay-event="tableDataRemove" _permission="visionPlan:remove">删除
+        </button>
+    </div>
+</script>
+
+
+<script type="text/html" id="tableRowBar">
+    <a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius data-count-edit" lay-event="tableRowEdit"
+       _permission="visionPlan:update">修改</a>
+    <a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius layui-btn-danger data-count-delete"
+       lay-event="tableRowRemove" _permission="visionPlan:remove">删除</a>
+</script>
+
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+    ;!function () {
+        let $ = layui.$,
+            layer = layui.layer,
+            table = layui.table,
+            form = layui.form,
+            laydate = layui.laydate,
+            upload = layui.upload;
+
+        //日期
+        laydate.render({
+            elem: '#startTime'
+        });
+        laydate.render({
+            elem: '#endTime'
+        });
+
+        table.render({
+            elem: '#tableData'
+            , method: 'post'
+            , contentType: 'application/json;charset=utf-8'
+            , url: 'vision/plan/planList'
+            , where: {'planType': -1, 'planAction': -1, 'actionMode': -1}
+            , height: 550
+            , cols: [[
+                {type: 'checkbox', fixed: 'left'}
+                , {type: 'numbers', fixed: 'left'}
+                , {field: 'userId', title: '用户ID', width: 120}
+                , {field: 'planId', title: '计划ID', width: 120, unresize: true}
+                , {field: 'planName', title: '计划名称', width: 148}
+                , {
+                    field: 'planType', title: '计划类型', width: 120, templet: function (data) {
+                        let type = '';
+                        switch (data.planType) {
+                            case 0 :
+                                type = '年提醒';
+                                break;
+                            case 1 :
+                                type = '月提醒';
+                                break
+                            case 2 :
+                                type = '周提醒'
+                                break
+                            case 3:
+                                type = '天提醒'
+                                break
+                            case 4:
+                                type = '小时提醒'
+                                break
+                            case 5 :
+                                type = '一次性提醒'
+                                break
+                            case 6 :
+                                type = '每45分钟提醒'
+                                break
+                            case 7:
+                                type = '每30分钟提醒'
+                                break
+                            case 8 :
+                                type = '每三天提醒'
+                                break
+                            default :
+                                type = '其他'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'actionMode', title: '执行模式', width: 150, templet: function (data) {
+                        let type = '';
+                        switch (data.actionMode) {
+                            case 0 :
+                                type = '状态栏提醒';
+                                break;
+                            case 1 :
+                                type = '弹出框提醒';
+                                break
+                            case 2 :
+                                type = '立即强制切换'
+                                break
+                            case 3:
+                                type = '倒计时切换可取消'
+                                break
+                            default :
+                                type = '其他'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'planAction', title: '计划操作', width: 120, templet: function (data) {
+                        let type = '';
+                        switch (data.planAction) {
+                            case 0 :
+                                type = '视力测试';
+                                break;
+                            case 1 :
+                                type = '视力防护';
+                                break
+                            case 2 :
+                                type = '其他'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {field: 'startDate', title: '开始时间', width: 180}
+                , {field: 'endDate', title: '结束时间', width: 180}
+                , {field: 'createTime', title: '创建时间', width: 180}
+                , {field: 'updateTime', title: '修改时间', width: 180}
+                , {field: 'remark', title: '备注', width: 100}
+                , {title: '操作', width: 120, align: "center", templet: '#tableRowBar',fixed:'right'}
+            ]]
+            , request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            }
+            , parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                if (res.success) {
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.total, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            }
+            , page: true
+            , toolbar: '#tableToolbar' //开启头部工具栏，并为其绑定左侧模板
+            , done: function (res, curr, count) {
+                // importRender();
+                permission();
+            }
+        });
+
+
+        //监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            console.log('submit')
+
+            let planType = $("select[name='planType']").val();
+            let planAction = $("select[name='planAction']").val();
+            let actionMode = $("select[name='actionMode']").val();
+            if (planType == '' || planType == null)
+                data.field.planType = -1;
+            if (planAction == '' || planAction == null)
+                data.field.planAction = -1;
+            if (actionMode == '' || actionMode == null)
+                data.field.actionMode = -1;
+            //执行搜索重载
+            table.reload('tableData', {
+                page: {curr: 1}
+                , where: data.field
+            }, 'data');
+        });
+
+        //头工具栏事件
+        table.on('toolbar(tableData)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            switch (obj.event) {
+                case 'tableDataAdd':
+                    openIframeInsert('添加');
+                    break;
+                case 'tableDataRemove':
+                    removePlan(data);
+                    break;
+            }
+            ;
+        });
+
+        //监听表格行操作事件
+        table.on('tool(tableData)', function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'tableRowEdit':
+                    openIframeUpdate('修改', data.planId);
+                    break;
+                case 'tableRowRemove':
+                    removePlan(new Array(data));
+                    break;
+            }
+            ;
+        });
+
+        function openIframeInsert(title) {
+            openIframe(title, 'vision/plan/insert');
+        }
+
+        function openIframeUpdate(title, planId) {
+            openIframe(title, 'vision/plan/update?', planId);
+        }
+
+        function openIframe(title, url, planId) {
+            var param = '';
+            if (!$.isEmptyObject(planId)) {
+                param += 'planId=' + planId;
+            }
+            layer.open({
+                type: 2,
+                title: title + '计划信息',
+                content: [url + param],//no没有滚动条
+                shade: 0.5,
+                maxmin: true, //开启最大化最小化按钮
+                area: ['730px', '830px']
+            });
+        }
+
+
+        function removePlan(data) {
+            if (data.length < 1) {
+                layer.msg('请选择您要删除的数据');
+                return;
+            }
+            layer.prompt({title: '输入口令，并确认', formType: 2}, function (pass, index) {
+                if (pass != confirmPwd()) {
+                    return layer.msg('口令不正确');
+                }
+                layer.close(index);
+                layer.confirm('确定要删除吗?', function () {
+                    $.ajax({
+                        url: '/vision/plan/visionPlanRemove',
+                        type: 'POST',
+                        contentType: 'application/json;charset=utf-8',
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            if (res.success) {
+                                layer.msg(res.msg, table.reload('tableData'));
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+    }();
+</script>
+</body>
+</html>

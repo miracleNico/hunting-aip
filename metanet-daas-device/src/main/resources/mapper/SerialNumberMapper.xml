@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.SerialNumberMapper">
+
+	<select id="getSerialNumber" resultType="work.metanet.server.vo.SerialNumberVo">
+		select
+		 	sn.*
+		from t_serial_number sn where sn.status=1 and sn.sn_code=#{snCode}
+	</select>
+
+	<update id="removeSerialNumber">
+		update t_serial_number set status=false 
+		where use_status=false and sn_code in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.snCode}
+		</foreach>
+		)
+	</update>
+
+	<insert id="addSerialNumber">
+		INSERT INTO t_serial_number(sn_code,remark,max_use_number,app_id)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.snCode},#{item.remark},#{item.maxUseNumber},#{item.appId})
+		</foreach>
+	</insert>
+	
+	<select id="serialNumberInfo" resultType="work.metanet.api.sn.protocol.ReqSerialNumberInfo$RespSerialNumberInfo">
+		SELECT
+			DATE_FORMAT(sn.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			sn.*
+		FROM t_serial_number sn 
+		where 1=1
+			and sn.`status`=true
+			and sn.sn_code=#{snCode}		
+	</select>
+	
+	<select id="serialNumberList" resultType="work.metanet.api.sn.protocol.ReqSerialNumberList$RespSerialNumberList">
+		SELECT
+			DATE_FORMAT(sn.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(sn.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			ap.app_name,
+			sn.*
+		FROM t_serial_number sn 
+			left join t_app ap on ap.app_id=sn.app_id
+		where sn.`status`=true
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}
+			</if>
+			<if test="snCode!=null and snCode!=''">
+				and sn.sn_code like CONCAT('%',#{snCode},'%')
+			</if>
+			<if test="appId!=null and appId!=''">
+				and sn.app_id=#{appId}
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(sn.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(sn.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and sn.remark like CONCAT('%',#{remark},'%')
+			</if>
+			<if test="useStatus!=null">
+				and sn.use_status=${useStatus}
+			</if>
+		order by sn.create_time desc
+	</select>
+	
+	
+	
+</mapper>

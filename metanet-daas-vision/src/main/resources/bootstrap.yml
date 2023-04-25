@@ -1,0 +1,36 @@
+#server:
+#  port: 8704
+spring:
+  profiles:
+    active: test
+  application:
+    name: metanet-daas-vision
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    alibaba:
+      seata:
+        tx-service-group: ${spring.application.name}-group
+    nacos:
+      server-addr: metanet-nacos:8848
+      discovery:
+#        server-addr: metanet-nacos:8848
+        namespace: public
+        group: DEFAULT_GROUP
+      config:
+        # nacos 配置中心服务地址 nginx 代理的地址
+        # 默认  ${spring.cloud.nacos.server-addr}
+#        server-addr: metanet-nacos:8848
+        file-extension: yml
+        prefix: ${spring.application.name}
+        # dataID  ${prefix}-${spring.profiles.active}.${file-extension}
+        # 命名空间 默认 public
+        namespace: public
+        # 配置组  默认 DEFAULT_GROUP
+        group: DEFAULT_GROUP
+        # 共享配置(公共配置)
+#        shared-configs:
+#          - data-id: ${spring.application.name}-shared.yml
+#            group: DEFAULT_GROUP  # 配置组  默认 DEFAULT_GROUP
+#            refresh: true # 是否动态刷新，默认为false
+

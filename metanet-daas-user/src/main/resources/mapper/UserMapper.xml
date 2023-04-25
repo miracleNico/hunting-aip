@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.UserMapper">
+
+	<select id="userTotal" resultType="int">
+		select
+		count(1)
+		from t_user u
+		join t_app ap on ap.`status`=true and ap.app_id=u.app_id
+		where u.`status`=true
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+	</select>
+
+	<update id="removeUser">
+		update t_user set status=false 
+		where user_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.userId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getUser" resultType="work.metanet.server.vo.UserVo">
+		select DATE_FORMAT(birthday,'%Y-%m-%d') birthday,u.* from t_user u where u.status=1
+		<if test="appId!=null and appId!=''">
+			and u.app_id=#{appId}
+		</if>
+		<if test="username!=null and username!=''">
+			and u.username=#{username}
+		</if>
+		<if test="phone!=null and phone!=''">
+			and u.phone=#{phone}
+		</if>
+		<if test="email!=null and email!=''">
+			and u.email=#{email}
+		</if>
+		<if test="enableStatus!=null and enableStatus!=''">
+			and u.enable_status=${enableStatus}
+		</if>
+	</select>
+	
+	<select id="getUserList" resultType="work.metanet.api.user.protocol.ReqUserList$RespUserList">
+		select 
+			u.user_id,
+			ap.app_name,
+			u.phone,
+			DATE_FORMAT(u.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			lg.device_id,
+			dv.device_name lastLoginDeviceName,
+			dv.wireless_mac lastLoginDeviceMac,
+			DATE_FORMAT(lg.create_time,'%Y-%m-%d %H:%i:%s') last_login_time
+		from t_user u 
+			left join t_app ap on ap.app_id=u.app_id
+			left join(
+			select lg.*
+			from t_user_login lg
+			left join t_user_login lg2 on lg2.user_id=lg.user_id and lg2.create_time>lg.create_time
+			WHERE ISNULL(lg2.user_login_id)
+			) lg on lg.user_id=u.user_id
+			left join t_device dv on dv.device_id=lg.device_id
+		where 1=1
+			AND u.`status`=true
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+		<if test="user!=null and user!=''">
+			and (
+				u.user_id like CONCAT('%',#{user},'%') or
+				u.phone like CONCAT('%',#{user},'%') or
+				u.email like CONCAT('%',#{user},'%')
+				)
+		</if>
+		<if test="appId!=null and appId!=''">
+			and u.app_id=#{appId}
+		</if>
+		<if test="device!=null and device!=''">
+			and (
+				dv.device_id like CONCAT('%',#{device},'%') or
+				dv.device_name like CONCAT('%',#{device},'%') or
+				dv.wireless_mac like CONCAT('%',#{device},'%') or
+				dv.uuid like CONCAT('%',#{device},'%')
+				)
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			and DATE_FORMAT(u.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			and DATE_FORMAT(u.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+		</if>
+		<if test="enableStatus!=null and enableStatus!=''">
+			and u.enable_status=${enableStatus}
+		</if>
+		<if test="remark!=null and remark!=''">
+			and u.remark like CONCAT('%',#{remark},'%')
+		</if>
+		ORDER BY u.create_time desc
+	</select>
+	
+
+	<select id="userInfoFromThird" parameterType="work.metanet.model.UserFromThird" resultType="work.metanet.api.user.protocol.ReqUserInfo$RespUserInfo">
+		select
+			*
+		from t_user
+		<where>
+			phone = #{ownerTel}
+		</where>
+		order by create_time desc limit 1
+	</select>
+
+
+    <update id="updateUserById" parameterType="map" >
+        update t_user
+        <set>
+            <if test="ownerId != null and ownerId != ''">username = #{ownerId},</if>
+            <if test="ownerName != null and ownerName != ''">nick_name = #{ownerName},</if>
+            <if test="ownerAge != null and ownerAge != ''">age = #{ownerAge},</if>
+            <if test="ownerTel != null and ownerTel != ''">phone = #{ownerTel},</if>
+        </set>
+        <where>
+            user_id = #{userId}
+        </where>
+    </update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+</mapper>

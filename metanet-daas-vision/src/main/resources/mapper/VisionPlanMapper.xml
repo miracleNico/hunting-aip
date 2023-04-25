@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionPlanMapper">
+    <select id="getVisionPlanList" parameterType="work.metanet.api.vision.protocol.ReqVisionPlanList"
+            resultType="work.metanet.api.vision.protocol.ReqVisionPlanList$RespVisionPlanList">
+        select
+        user_id,
+        plan_name,
+        start_date,
+        end_date,
+        plan_type,
+        action_mode,
+        plan_action,
+        plan_id,
+        remark,
+        create_time,
+        update_time
+        from t_vision_plan
+        <where>
+            status = 1
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="planName != null and planName!= ''">
+                and plan_name like concat('%',#{planName},'%')
+            </if>
+            <if test="planType != null and planType != -1">
+                and plan_type = #{planType}
+            </if>
+            <if test="actionMode != null and actionMode != -1">
+                and action_mode = #{actionMode}
+            </if>
+            <if test="planAction != null and planAction != -1">
+                and plan_action = #{planAction}
+            </if>
+            <if test="planId != null and planId != ''">
+                and plan_id = #{planId}
+            </if>
+            <if test="startDate!=null">
+                and DATE_FORMAT(start_date,'%Y%m%d')>=DATE_FORMAT(#{startDate},'%Y%m%d')
+            </if>
+            <if test="endDate!=null">
+                and DATE_FORMAT(end_date,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endDate},'%Y%m%d')
+            </if>
+        </where>
+        order by update_time desc
+    </select>
+
+    <select id="getVisionPlanInfo" parameterType="work.metanet.api.vision.protocol.ReqVisionPlanInfo"
+            resultType="work.metanet.api.vision.protocol.ReqVisionPlanInfo$RespVisionPlanInfo">
+        select
+        user_id,
+        plan_name,
+        start_date,
+        end_date,
+        plan_type,
+        action_mode,
+        plan_action,
+        plan_id,
+        remark,
+        create_time,
+        update_time
+        from t_vision_plan
+        <where>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="planId != null and planId != ''">
+                and plan_id = #{planId}
+            </if>
+        </where>
+    </select>
+
+    <update id="saveVisionPlan" parameterType="work.metanet.api.vision.protocol.ReqSaveVisionPlan">
+        update
+        t_vision_plan
+        <set>
+            update_time = current_timestamp,
+            <if test="userId != null and userId != ''">
+                user_id = #{userId},
+            </if>
+            <if test="planType != null">
+                plan_type = #{planType},
+            </if>
+            <if test="planName != null and planName != ''">
+                plan_name = #{planName},
+            </if>
+            <if test="startDate != null">
+                start_date = #{startDate},
+            </if>
+            <if test="endDate != null">
+                end_date = #{endDate},
+            </if>
+            <if test="actionMode != null">
+                action_mode = #{actionMode},
+            </if>
+            <if test="planAction != null">
+                plan_action = #{planAction},
+            </if>
+            remark = #{remark}
+        </set>
+        <where>
+            <if test="planId != null and planId != ''">
+                plan_id = #{planId}
+            </if>
+        </where>
+    </update>
+
+    <insert id="insertVisionPlan" parameterType="work.metanet.api.vision.protocol.ReqInsertVisionPlan">
+        insert into t_vision_plan
+        (user_id,
+         plan_name,
+         start_date,
+         end_date,
+         plan_type,
+         action_mode,
+         plan_action,
+         plan_id,
+         remark,
+         create_time,
+         update_time)
+        values
+        (#{userId},
+         #{planName},
+         #{startDate},
+         #{endDate},
+         #{planType},
+         #{actionMode},
+         #{planAction},
+         #{planId},
+         #{remark},
+         current_timestamp,
+         current_timestamp)
+    </insert>
+
+    <update id="removeVisionPlan" parameterType="work.metanet.api.vision.protocol.ReqRemoveVisionPlan">
+        update
+        t_vision_plan
+        <set>
+            status = 0
+        </set>
+        <where>
+            plan_id in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                #{item.planId}
+            </foreach>
+        </where>
+    </update>
+
+
+</mapper>

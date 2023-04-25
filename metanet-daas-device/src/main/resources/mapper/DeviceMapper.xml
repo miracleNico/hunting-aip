@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.DeviceMapper">
+
+	<select id="appDeviceChart" resultType="work.metanet.api.statistical.vo.ChartVo">
+		select 
+		ap.app_name name,count(d.device_id) value
+		from t_device d
+		join t_device_app da on da.device_id=d.device_id
+		join t_app ap on ap.app_id=da.app_id
+		where d.`status`=true and ap.`status`=true
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+		GROUP BY ap.app_id
+		ORDER BY count(d.device_id) desc
+		limit 0,10
+	</select>
+	
+	<select id="appDeviceActiveChart" resultType="work.metanet.api.statistical.vo.ChartVo">
+		select 
+		ap.app_name name,count(d.device_id) value
+		from t_device d
+		join t_device_app da on da.device_id=d.device_id
+		join t_app ap on ap.app_id=da.app_id
+		where d.`status`=true and ap.`status`=true and !ISNULL(da.activate_time)
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+		GROUP BY ap.app_id
+		ORDER BY count(d.device_id) desc
+		limit 0,10
+	</select>
+
+	<select id="deviceTotal" resultType="int">
+		select 
+		count(DISTINCT d.device_id) 
+		from t_device d
+		join t_device_app da on da.device_id=d.device_id
+		join t_app ap on ap.app_id=da.app_id
+		where d.`status`=true and ap.`status`=true
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+	</select>
+	
+	<select id="deviceActiveTotal" resultType="int">
+		select 
+		count(DISTINCT d.device_id) 
+		from t_device d
+		join t_device_app da on da.device_id=d.device_id
+		join t_app ap on ap.app_id=da.app_id
+		where d.`status`=true and ap.`status`=true and !ISNULL(da.activate_time)
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+	</select>
+
+	<update id="removeDevice">
+		update t_device set status=false
+		where device_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.deviceId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getAuthDevice" resultType="work.metanet.server.vo.DeviceVo">
+		select dv.*
+		from t_device dv 
+			join t_brand bd on bd.brand_id=dv.brand_id
+			join t_model md on md.model_id=dv.model_id
+		where 1=1
+			and dv.status=true
+			and dv.enable_status=true
+			and bd.status=true
+			and md.status=true
+			and md.brand_id=bd.brand_id
+			<choose>
+				<when test="deviceId!=null and deviceId!=''">
+					and dv.device_id=#{deviceId}
+				</when>
+				<otherwise>
+					and bd.brand_name=#{brandName}
+					and md.model_name=#{modelName}
+					<choose>
+						<when test="deviceAuthType=='MAC'">
+							and dv.wireless_mac=#{mac}
+						</when>
+						<when test="deviceAuthType=='SN'">
+							and dv.serial_number=#{serialNumber}
+						</when>
+						<otherwise>
+							and dv.wireless_mac=#{mac}
+							and dv.serial_number=#{serialNumber}
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+	</select>
+	
+	
+	<select id="deviceInfo" resultType="work.metanet.api.device.protocol.ReqDeviceInfo$RespDeviceInfo">
+		select
+			bd.brand_id,
+			bd.brand_name,
+			md.model_id,
+			md.model_name,
+			DATE_FORMAT(dv.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+			dv.device_id,
+			dv.device_name,
+			dv.source,
+			dv.uuid,
+			dv.serial_number,
+			dv.wired_mac,
+			dv.wireless_mac,
+			dv.enable_status,
+			dv.imei,
+			dv.imei2,
+			dv.bluetooth,
+			dv.firmware_info,
+			dv.remark
+		from t_device dv
+			left join t_brand bd on bd.brand_id=dv.brand_id
+			left join t_model md on md.model_id=dv.model_id
+		where 1=1
+			and dv.`status`=true
+			and dv.device_id=#{deviceId}
+	</select>
+	
+	<select id="deviceList" resultType="work.metanet.api.device.protocol.ReqDeviceList$RespDeviceList">
+		select
+			bd.brand_id,
+			bd.brand_name,
+			md.model_id,
+			md.model_name,
+			group_concat(
+			CONCAT_WS('/',ap.app_name,DATE_FORMAT(da.activate_time,'%Y%m%d %H:%i:%s'),da.sn_code) 
+			separator ' | '
+			) appInfos,
+			DATE_FORMAT(dv.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+			DATE_FORMAT(dv.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			dv.device_id,
+			dv.device_name,
+			dv.source,
+			dv.uuid,
+			dv.serial_number,
+			dv.wired_mac,
+			dv.wireless_mac,
+			dv.enable_status,
+			dv.imei,
+			dv.imei2,
+			dv.bluetooth,
+			dv.firmware_info,
+			dv.remark
+		from t_device dv
+			left join t_brand bd on bd.brand_id=dv.brand_id
+			left join t_model md on md.model_id=dv.model_id
+			left join t_device_app da on da.device_id=dv.device_id
+			left join t_app ap on ap.app_id=da.app_id
+		where 1=1
+			and dv.`status`=true
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}
+			</if>
+			<if test="enableStatus!=null">
+				and dv.enable_status=${enableStatus}
+			</if>
+			<if test="snCode!=null and snCode!=''">
+				and da.sn_code like CONCAT('%',#{snCode},'%')
+			</if>
+			<if test="serialNumber!=null and serialNumber!=''">
+				and dv.serial_number like CONCAT('%',#{serialNumber},'%')
+			</if>
+			<if test="uuid!=null and uuid!=''">
+				and dv.uuid like CONCAT('%',#{uuid},'%')
+			</if>
+			<if test="source!=null and source!=''">
+				and dv.source=#{source}
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(dv.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(dv.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="mac!=null and mac!=''">
+				and (dv.wired_mac like CONCAT('%',#{mac},'%') or dv.wireless_mac like CONCAT('%',#{mac},'%'))				
+			</if>
+			<if test="device!=null and device!=''">
+				and (dv.device_id like CONCAT('%',#{device},'%') or dv.device_name like CONCAT('%',#{device},'%'))				
+			</if>
+			<if test="brand!=null and brand!=''">
+				and (bd.brand_id like CONCAT('%',#{brand},'%') or bd.brand_name like CONCAT('%',#{brand},'%'))
+			</if>
+			<if test="model!=null and model!=''">
+				and (md.model_id like CONCAT('%',#{model},'%') or md.model_name like CONCAT('%',#{model},'%'))				
+			</if>
+			<if test="app!=null and app!=''">
+				and (ap.app_id like CONCAT('%',#{app},'%') or ap.app_name like CONCAT('%',#{app},'%'))				
+			</if>
+			<if test="activeStatus!=null">
+				<choose>
+					<when test="activeStatus">and !ISNULL(da.activate_time)</when>
+					<otherwise>and ISNULL(da.activate_time)</otherwise>
+				</choose>
+			</if>
+		GROUP BY dv.device_id
+		order by dv.device_id desc
+	</select>
+	
+	
+	
+</mapper>

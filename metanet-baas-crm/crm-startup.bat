@@ -1,0 +1,1 @@
+java -jar target\metanet-baas-crm.jar

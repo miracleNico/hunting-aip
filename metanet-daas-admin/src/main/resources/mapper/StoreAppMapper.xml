@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.StoreAppMapper">
+
+	<select id="searchStoreApp" resultType="work.metanet.api.storeApp.protocol.ReqSearchStoreApp$RespSearchStoreApp">
+		select
+			sa.package_name,
+			sa.call_class,
+			sa.app_name,
+			sa.url,
+			sa.icon,
+			sa.version_name,
+			sa.version_code,
+			sa.md5,
+			sa.file_size
+		from t_store_app sa
+		where 1=1
+			and sa.`status`=true
+			and sa.`enable`=true
+			and FIND_IN_SET(#{phaseTag},sa.phase_tag)>0
+			and (sa.channel_id='' or ISNULL(sa.channel_id) or sa.channel_id=#{channelId})
+			<if test="contentType!=null and contentType!=''">
+				and content_type=#{contentType}	
+			</if>
+			<if test="searchKey!=null and searchKey!=''">
+				and sa.app_name like CONCAT('%',#{searchKey},'%')
+			</if>
+			and 
+				CASE sa.app_scope
+					WHEN '1' THEN (
+						select count(1)
+						from t_store_app_scope sas
+						join t_app ap on ap.app_id=sas.app_id
+						where 1=1
+						and sas.store_app_id=sa.store_app_id
+						and ap.package_name=#{packageName}
+						limit 1
+					)>0
+					ELSE 1=1
+				END
+		ORDER BY sa.download_number desc
+	</select>
+
+	<insert id="addStoreAppScope">
+		INSERT INTO t_store_app_scope(store_app_scope_id,store_app_id,app_id)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.storeAppScopeId},#{item.storeAppId},#{item.appId})
+		</foreach>
+	</insert>
+
+	<update id="removeStoreApp">
+		update t_store_app set status=false 
+		where store_app_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.storeAppId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getStoreApp" resultType="work.metanet.model.StoreApp">
+		select * from t_store_app where status=true
+		<if test="packageName!=null and packageName!=''">
+			and package_name=#{packageName}
+		</if>
+		<if test="storeAppId!=null and storeAppId!=''">
+			and store_app_id=#{storeAppId}
+		</if>
+	</select>
+	
+	<select id="storeAppInfo" resultType="work.metanet.api.storeApp.protocol.ReqStoreAppInfo$RespStoreAppInfo">
+		select 
+			DATE_FORMAT(sa.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(sa.release_time,'%Y-%m-%d') release_time,
+			sa.store_app_id,
+			sa.channel_id,
+			c.channel_name,
+			sa.app_name,
+			sa.icon,
+			sa.package_name,
+			sa.call_class,
+			sa.version_name,
+			sa.version_code,
+			sa.url,
+			sa.md5,
+			sa.file_size,
+			sa.app_scope,
+			sa.download_number,
+			sa.phase_tag,
+			sa.content_type,
+			sa.developer,
+			sa.images,
+			sa.instruction,
+			sa.enable,
+			sa.remark
+		from t_store_app sa 
+		left join t_channel c on c.channel_id=sa.channel_id
+		where 1=1
+			and sa.`status`=true
+			and sa.store_app_id=#{storeAppId}
+	</select>
+	
+	<select id="storeAppList" resultType="work.metanet.api.storeApp.protocol.ReqStoreAppList$RespStoreAppList">
+		select 
+			DATE_FORMAT(sa.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(sa.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			DATE_FORMAT(sa.release_time,'%Y-%m-%d') release_time,
+			sa.store_app_id,
+			sa.channel_id,
+			c.channel_name,
+			sa.app_name,
+			sa.icon,
+			sa.package_name,
+			sa.call_class,
+			sa.version_name,
+			sa.version_code,
+			sa.url,
+			sa.md5,
+			sa.file_size,
+			sa.app_scope,
+			sa.download_number,
+			sa.phase_tag,
+			sa.content_type,
+			sa.developer,
+			sa.images,
+			sa.instruction,
+			sa.enable,
+			sa.remark
+		from t_store_app sa 
+		left join t_channel c on c.channel_id=sa.channel_id
+		left join t_store_app_scope sas on sas.store_app_id=sa.store_app_id
+		where 1=1
+			and sa.`status`=true
+			<if test="appName!=null and appName!=''">
+				and sa.app_name like CONCAT('%',#{appName},'%')
+			</if>
+			<if test="packageName!=null and packageName!=''">
+				and sa.package_name like CONCAT('%',#{packageName},'%')
+			</if>
+			<if test="channelId!=null and channelId!=''">
+				and sa.channel_id=#{channelId}
+			</if>
+			<if test="appId!=null and appId!=''">
+				and (sa.app_scope='0' or sas.app_id=#{appId})
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(sa.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(sa.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and sa.remark like CONCAT('%',#{remark},'%')
+			</if>
+		GROUP BY sa.store_app_id
+		order by sa.create_time desc
+	</select>
+	
+	<select id="storeAppScopeInfoList" resultType="work.metanet.api.storeApp.protocol.ReqStoreAppScopeInfo$RespStoreAppScopeInfo">
+		select
+			sac.*,
+			ap.app_name
+		from t_store_app_scope sac
+			join t_app ap on ap.app_id=sac.app_id
+		where sac.store_app_id=#{storeAppId}
+	</select>
+	 
+</mapper>

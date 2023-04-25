@@ -1,0 +1,15 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+MAINTAINER metanet
+
+# 挂载目录
+VOLUME /home/metanet/baas/crm
+# 创建目录
+RUN mkdir -p /home/metanet/baas/crm
+# 指定路径
+WORKDIR /home/metanet/baas/crm
+# 复制jar文件到路径
+COPY ./jar/metanet-baas-crm.jar /home/metanet/baas/crm/metanet-baas-crm.jar
+# 启动系统服务
+ENTRYPOINT ["java","-jar","metanet-baas-crm.jar"]

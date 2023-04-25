@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>work.metanet</groupId>
+	<artifactId>metanet</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>metanet</name>
+	<description>metanet application integrated platform</description>
+	<packaging>pom</packaging>
+	
+	<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.13.RELEASE</version>
+<!--		<version>2.7.9</version>-->
+    </parent>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven.test.skip>true</maven.test.skip> 
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+		<revision>1.0.0-SNAPSHOT</revision>
+		<spring.version>5.3.25</spring.version>
+        <swagger.version>2.9.2</swagger.version>
+<!--		<spring-boot.version>2.7.9</spring-boot.version>-->
+		<spring-boot.version>2.2.13.RELEASE</spring-boot.version>
+		<spring-boot-admin.version>2.7.10</spring-boot-admin.version>
+		<spring-cloud.version>2021.0.5</spring-cloud.version>
+<!--		<spring-cloud.version>2020.0.6</spring-cloud.version>-->
+		<spring-cloud-alibaba.version>2.2.9.RELEASE</spring-cloud-alibaba.version>
+<!--		<spring-cloud-alibaba.version>2021.0.4.0</spring-cloud-alibaba.version>-->
+		<spring-cloud-openfeign.version>2.2.10.RELEASE</spring-cloud-openfeign.version>
+		<spring-cloud-loadbalancer.version>2.2.9.RELEASE</spring-cloud-loadbalancer.version>
+		<spring-cloud-dubbo.version>2.2.7.RELEASE</spring-cloud-dubbo.version>
+		<spring-cloud-gateway.version>2.2.10.RELEASE</spring-cloud-gateway.version>
+		<swagger.fox.version>3.0.0</swagger.fox.version>
+		<swagger.core.version>1.6.2</swagger.core.version>
+		<xiaoymin.version>1.9.4</xiaoymin.version>
+		<tobato.version>1.27.2</tobato.version>
+		<kaptcha.version>2.3.3</kaptcha.version>
+		<pagehelper.boot.version>1.4.6</pagehelper.boot.version>
+		<pagehelper.version>5.1.10</pagehelper.version>
+		<druid.version>1.2.15</druid.version>
+		<dynamic-ds.version>3.5.2</dynamic-ds.version>
+		<commons.io.version>2.11.0</commons.io.version>
+		<commons.fileupload.version>1.4</commons.fileupload.version>
+		<commons-pool2.version>2.11.1</commons-pool2.version>
+		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<velocity.version>2.3</velocity.version>
+		<fastjson2.version>2.0.22</fastjson2.version>
+		<fastjson.version>1.2.17</fastjson.version>
+		<jjwt.version>0.9.1</jjwt.version>
+		<minio.version>8.2.2</minio.version>
+		<poi-ooxml.version>4.1.2</poi-ooxml.version>
+		<poi.version>5.2.3</poi.version>
+		<transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
+		<log4j.version>1.2.17</log4j.version>
+		<lombok.version>1.18.26</lombok.version>
+		<javax-persistence.version>1.0.2</javax-persistence.version>
+		<gson.version>2.10.1</gson.version>
+		<jettison.version>1.4.0</jettison.version>
+		<prettytime.version>4.0.1.Final</prettytime.version>
+		<joda-time.version>2.12.2</joda-time.version>
+		<jexcelapi.version>2.6.12</jexcelapi.version>
+		<bcprov-jdk15on.version>1.64</bcprov-jdk15on.version>
+		<hutool-all.version>5.3.4</hutool-all.version>
+		<tinypinyin.version>2.0.3</tinypinyin.version>
+		<tencentcloudapi.version>3.1.67</tencentcloudapi.version>
+		<cos_api.version>5.6.27</cos_api.version>
+		<jackson-databind.version>2.14.2</jackson-databind.version>
+		<jaxb-api.version>2.3.1</jaxb-api.version>
+		<servlet-api.version>4.0.1</servlet-api.version>
+		<mysql-connector.version>5.1.49</mysql-connector.version>
+		<druid.version>1.1.10</druid.version>
+		<mongodb.boot.version>1.0.0.RELEASE</mongodb.boot.version>
+		<mapper.boot.version>2.1.5</mapper.boot.version>
+	</properties>
+	
+	<repositories>
+		<repository>
+	       <id>alimaven</id>    
+	       <name>aliyun maven</name>    
+	       <url>https://maven.aliyun.com/repository/public</url>    
+	       <releases>    
+	           <enabled>true</enabled>    
+	       </releases>    
+	        <snapshots>    
+	            <enabled>true</enabled>    
+	        </snapshots>    
+	    </repository>
+	    <repository>
+	        <id>spring-snapshots</id>
+	        <name>Spring Snapshots</name>
+	        <url>https://repo.spring.io/libs-snapshot</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+	    </repository>
+	    <repository>
+            <id>central-repository</id>
+            <name>Central Repository</name>
+            <url>http://central.maven.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+	</repositories>
+	
+	<!-- 父POM负责管理版本 -->
+	<dependencyManagement>  
+        <dependencies>
+			<!-- Spring Context Support -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<!-- Spring Web -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<!-- SpringBoot 依赖配置 -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- Hibernate Validator -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-validation</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-actuator</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring-boot.version}</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.junit.vintage</groupId>
+						<artifactId>junit-vintage-engine</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- SpringCloud 微服务 -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- openfeign -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-openfeign</artifactId>
+				<version>${spring-cloud-openfeign.version}</version>
+			</dependency>
+			<!-- Loadbalancer -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+				<version>${spring-cloud-loadbalancer.version}</version>
+			</dependency>
+			<!-- SpringCloud Gateway -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-gateway</artifactId>
+				<version>${spring-cloud-gateway.version}</version>
+			</dependency>
+			<!-- SpringCloud Alibaba 微服务 -->
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-alibaba-dependencies</artifactId>
+				<version>${spring-cloud-alibaba.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- SpringBoot Seata -->
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+				<version>${spring-cloud-alibaba.version}</version>
+			</dependency>
+			<!-- Dubbo -->
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-starter-dubbo</artifactId>
+				<version>${spring-cloud-dubbo.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>servlet-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- nacos -->
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+				<version>${spring-cloud-alibaba.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+				<version>${spring-cloud-alibaba.version}</version>
+			</dependency>
+
+			<!-- JSON 解析器和生成器 -->
+			<dependency>
+				<groupId>com.alibaba.fastjson2</groupId>
+				<artifactId>fastjson2</artifactId>
+				<version>${fastjson2.version}</version>
+			</dependency>
+			<!-- log4j -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<!-- 验证码 -->
+			<dependency>
+				<groupId>pro.fessional</groupId>
+				<artifactId>kaptcha</artifactId>
+				<version>${kaptcha.version}</version>
+			</dependency>
+			<!-- lombok -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>persistence-api</artifactId>
+				<version>${javax-persistence.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${gson.version}</version>
+			</dependency>
+			<!-- jettison简单JSON处理库 -->
+			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>${jettison.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+
+			<!-- io常用工具类 -->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons.io.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<version>${commons-pool2.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ocpsoft.prettytime</groupId>
+				<artifactId>prettytime</artifactId>
+				<version>${prettytime.version}</version>
+			</dependency>
+
+			<!-- JWT -->
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt</artifactId>
+				<version>${jjwt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${joda-time.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sourceforge.jexcelapi</groupId>
+				<artifactId>jxl</artifactId>
+				<version>${jexcelapi.version}</version>
+			</dependency>
+
+			<!-- excel工具 -->
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${poi-ooxml.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>${bcprov-jdk15on.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>cn.hutool</groupId>
+				<artifactId>hutool-all</artifactId>
+				<version>${hutool-all.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.github.promeg</groupId>
+				<artifactId>tinypinyin</artifactId>
+				<version>${tinypinyin.version}</version>
+			</dependency>
+			<!-- 腾讯云 -->
+			<dependency>
+				<groupId>com.tencentcloudapi</groupId>
+				<artifactId>tencentcloud-sdk-java</artifactId>
+				<version>${tencentcloudapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.qcloud</groupId>
+				<artifactId>cos_api</artifactId>
+				<version>${cos_api.version}</version>
+			</dependency>
+
+			<!-- 线程传递值 -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>transmittable-thread-local</artifactId>
+				<version>${transmittable-thread-local.version}</version>
+			</dependency>
+			<!-- pagehelper 分页插件 -->
+			<dependency>
+				<groupId>com.github.pagehelper</groupId>
+				<artifactId>pagehelper-spring-boot-starter</artifactId>
+				<version>${pagehelper.boot.version}</version>
+			</dependency>
+			<!-- 此处单独导入pagehelper目的是为了兼容消费端pagehelper.Page(注意此处导入的跟服务端不一样) -->
+			<dependency>
+				<groupId>com.github.pagehelper</groupId>
+				<artifactId>pagehelper</artifactId>
+				<version>${pagehelper.version}</version>
+			</dependency>
+			<!-- Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-databind.version}</version>
+			</dependency>
+
+			<!-- Jaxb -->
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb-api.version}</version>
+			</dependency>
+			<!-- Apache Lang3 -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+
+			<!-- 文件上传工具类 -->
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>${commons.fileupload.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${poi.version}</version>
+			</dependency>
+
+			<!-- Java Servlet -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servlet-api.version}</version>
+			</dependency>
+
+			<!-- Swagger 依赖配置 -->
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>${swagger.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger.core.version}</version>
+			</dependency>
+
+			<!--swagger2依赖-->
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<!-- swagger-bootstrap-ui包 -->
+			<dependency>
+				<groupId>com.github.xiaoymin</groupId>
+				<artifactId>swagger-bootstrap-ui</artifactId>
+				<version>${xiaoymin.version}</version>
+			</dependency>
+			<!-- FastDFS -->
+			<dependency>
+				<groupId>com.github.tobato</groupId>
+				<artifactId>fastdfs-client</artifactId>
+				<version>${tobato.version}</version>
+			</dependency>
+
+			<!-- 代码生成使用模板 -->
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-engine-core</artifactId>
+				<version>${velocity.version}</version>
+			</dependency>
+			<!-- Mysql Connector -->
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>${druid.version}</version>
+			</dependency>
+			<!-- mongodb连接池 -->
+			<dependency>
+				<groupId>com.spring4all</groupId>
+				<artifactId>mongodb-plus-spring-boot-starter</artifactId>
+				<version>${mongodb.boot.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>tk.mybatis</groupId>
+				<artifactId>mapper-spring-boot-starter</artifactId>
+				<version>${mapper.boot.version}</version>
+			</dependency>
+
+			<!-- Minio -->
+			<dependency>
+				<groupId>io.minio</groupId>
+				<artifactId>minio</artifactId>
+				<version>${minio.version}</version>
+			</dependency>
+
+
+			<!-- Api core -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-core</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Common -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-common</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- baas Common -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-baas-common</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- daas Common -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-daas-common</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Common Swagger -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-common-swagger</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Common security -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-common-security</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Common redis -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-common-redis</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Common seata -->
+			<dependency>
+				<groupId>work.metanet</groupId>
+				<artifactId>metanet-common-seata</artifactId>
+				<version>${revision}</version>
+			</dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+	
+	<build>
+		<pluginManagement>
+		    <plugins>
+			    <plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+				</plugin>
+		    </plugins>
+	    </pluginManagement>
+	</build>
+	
+	<modules>
+		<module>metanet-common</module>
+		<module>metanet-core</module>
+		<module>metanet-common-security</module>
+		<module>metanet-common-redis</module>
+		<module>metanet-common-seata</module>
+		<module>metanet-common-swagger</module>
+
+		<module>metanet-baas-common</module>
+
+		<module>metanet-baas-app</module>
+		<module>metanet-baas-auth</module>
+		<module>metanet-baas-channel</module>
+		<module>metanet-baas-crm</module>
+		<module>metanet-baas-gateway</module>
+		<module>metanet-baas-monitor</module>
+		<module>metanet-baas-openapi</module>
+		<module>metanet-baas-vision</module>
+		<module>metanet-baas-file</module>
+		<module>metanet-baas-gen</module>
+		<module>metanet-baas-job</module>
+
+		<module>metanet-daas-common</module>
+
+		<module>metanet-daas-admin</module>
+		<module>metanet-daas-device</module>
+		<module>metanet-daas-user</module>
+		<module>metanet-daas-vision</module>
+	</modules>
+	
+</project>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">应用名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="appName" placeholder="请输入应用名称" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="应用名称是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+	    <label class="layui-form-label">内容类型</label>
+        <div class="layui-input-inline">
+            <select name="contentType" lay-search="" id="contentType" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="内容类型是必填项，岂能为空？">
+                <option value=""></option>
+                <option value="EDU">学习</option>
+                <option value="AMUSEMENT">娱乐</option>
+            </select>
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+        <label class="layui-form-label">包名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="packageName" placeholder="请输入包名"  autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="包名是必填项，岂能为空？">
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label">调用类名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="callClass" placeholder="请输入类名" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+        <label class="layui-form-label">版本名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="versionName" id="versionName" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="版本名是必填项，岂能为空？">
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label">版本号</label>
+        <div class="layui-input-inline">
+            <input type="text" name="versionCode" id="versionCode" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="版本号是必填项，岂能为空？">
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">开发商</label>
+        <div class="layui-input-inline">
+            <input type="text" name="developer" id="developer" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">发布时间</label>
+        <div class="layui-input-inline">
+            <input type="text" name="releaseTime" id="releaseTime" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">文件地址</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="url" autocomplete="off" class="layui-input" placeholder="上传文件或外部链接" lay-verify="required" lay-reqtext="文件地址是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline layui-upload">
+ 		<a class="layui-btn layui-btn-radius" id="upload"><i class="layui-icon"></i>上传</a>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">MD5</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="md5" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">文件大小(b)</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="fileSize" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">应用图标</label>
+ 		<div class="layui-inline" style="width: 187px;">
+ 			<img width="35px" height="35px" class="layui-upload-img" name="icon" id="icon" style="margin-left: 20px">
+	  	</div>
+  	</div>
+  	<div class="layui-inline">
+ 		<div class="layui-inline layui-upload">
+	 		<a class="layui-btn layui-btn-radius" id="uploadIcon"><i class="layui-icon"></i>上传</a>
+	  	</div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">应用截图</label>
+ 		<div class="layui-inline layui-upload">
+	 		<a class="layui-btn layui-btn-radius" id="uploadImg"><i class="layui-icon"></i>上传</a>
+	  	</div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline layui-upload">
+ 		<blockquote class="layui-elem-quote layui-quote-nm">
+		    <div class="layui-upload-list" id="imgList" style="width: 590px;"></div>
+		 </blockquote>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">所属阶段</label>
+	    <div class="layui-input-block">
+	      <input type="checkbox" name="like" value="101" title="推荐">
+	      <input type="checkbox" name="like" value="0" title="幼儿">
+	      <input type="checkbox" name="like" value="1" title="小学">
+	      <input type="checkbox" name="like" value="2" title="中学">
+	      <input type="checkbox" name="like" value="3" title="高中">
+	      <input type="checkbox" name="like" value="100" title="综合">
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">应用范围</label>
+	    <div class="layui-input-inline">
+	        <input type="radio" name="appScope" lay-filter="appScope" value="0" title="所有" checked="">
+      		<input type="radio" name="appScope" lay-filter="appScope" value="1" title="指定">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	  	<label class="layui-form-label">上架状态</label>
+	    <div class="layui-input-inline">
+	         <input type="checkbox" name="enable" lay-skin="switch" lay-filter="switchEnable" lay-text="已上架|已下架">
+	    </div>
+    </div>
+  </div>
+  
+  <div id="tableScope" class="layui-form-item">
+  	<div class="layui-inline">
+    	<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">应用说明</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="instruction" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/select/xm-select.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate,upload = layui.upload;
+	
+	//日期
+    laydate.render({
+        elem: '#releaseTime'
+        ,type: 'date'
+    });
+	
+	init_data();
+	
+	function init_data(){
+		$('input[name="appName"]').val(initData.appName);
+		$('input[name="packageName"]').val(initData.packageName);
+		$('input[name="callClass"]').val(initData.callClass);
+		$('input[name="versionName"]').val(initData.versionName);
+		$('input[name="versionCode"]').val(initData.versionCode);
+		$('select[name="contentType"]').val(initData.contentType);
+		$('input[name="developer"]').val(initData.developer);
+		$('input[name="releaseTime"]').val(initData.releaseTime);
+		$('input[name="url"]').val(initData.url);
+		$('#icon').attr('src',initData.icon);
+		$('input[name="md5"]').val(initData.md5);
+		$('input[name="fileSize"]').val(initData.fileSize);
+		$('input[name="appScope"][value='+initData.appScope+']').prop('checked',true);
+		$('input[name="enable"]').prop('checked',initData.enable);
+		$('textarea[name="instruction"]').val(initData.instruction);
+		$('textarea[name="remark"]').val(initData.remark);
+		if(!$.isEmptyObject(initData.images)){
+			$.each(initData.images.split(','),function(i,v){
+				$('#imgList').append('<img src="'+ v +'" width="90px" height="120px" class="screenshot layui-upload-img">');
+			});
+		}
+		if(!$.isEmptyObject(initData.phaseTag)){
+			$.each(initData.phaseTag.split(','),function(i,v){
+				$('input[name="like"][value="'+v+'"]').prop('checked',true);
+			});
+		}
+		
+		form.render();
+		if(!$.isEmptyObject(initData.storeAppId)){
+			$('button[type="reset"]').hide();
+		}
+		if(initData.appScope==1){
+			$('#tableScope').show();
+			tableScope();
+		}else{
+			$('#tableScope').hide();
+		}
+	}
+	
+	$(document).on('click','.screenshot',function(){
+    	$(this).remove();
+    });
+	
+	$(document).on('click','#icon',function(){
+    	$(this).removeAttr('src');
+    });
+	
+	var uploadInde;
+	upload.render({
+	    elem: '#uploadImg'
+	    ,multiple: true
+	    ,url: 'api/file/upload'
+	    ,accept: 'img'
+		,progress: function(e , percent) {
+			uploadInde = layer.load(2, {shade: [0.5,'#fff']});
+		}
+	    ,done: function(res){
+	    	layer.close(uploadInde);
+	    	if(res.success){
+				$('#imgList').append('<img src="'+ res.data.url +'" width="90px" height="120px" class="screenshot layui-upload-img">');
+	    	}else{
+	    		layer.alert(res.msg);
+	    	}
+	    }
+	});
+	
+	upload.render({
+	    elem: '#uploadIcon'
+	    ,url: 'api/file/upload'
+	    ,accept: 'img' //普通文件
+		,progress: function(e , percent) {
+			uploadInde = layer.load(2, {shade: [0.5,'#fff']});
+		}
+	    ,done: function(res){
+	    	layer.close(uploadInde);
+	    	if(res.success){
+	    		$('#icon').attr('src',res.data.url);
+		    	layer.alert('上传成功');
+	    	}else{
+	    		layer.alert(res.msg);
+	    	}
+	    }
+	});
+	
+	upload.render({
+	    elem: '#upload'
+	    ,url: 'api/file/uploadStoreApp'
+	    ,accept: 'file' //普通文件
+	    ,exts: 'apk'
+		,progress: function(e , percent) {
+			uploadInde = layer.load(2, {shade: [0.5,'#fff']});
+		}
+	    ,done: function(res){
+	    	layer.close(uploadInde);
+	    	if(res.success){
+		    	$('input[name="md5"]').val(res.data.md5);
+				$('input[name="fileSize"]').val(res.data.fileSize);
+				$('input[name="url"]').val(res.data.url);
+		    	layer.alert('上传成功');
+	    	}else{
+	    		layer.alert(res.msg);
+	    	}
+	    }
+	});
+	
+	
+	function tableScope(){
+		var tb1 = table.render({
+			    elem: '#tableData'
+			   	,method:'post'
+			   	,contentType:'application/json;charset=utf-8'
+			   	,where:{'pageSize':100}
+			   	,url:'app/appSelected'
+				,height: 235
+				,width:625
+			    ,cols: [[
+			       {type: 'checkbox'}
+			      ,{field:'appId', title:'产品id',hide:true}
+			      ,{field:'appName', title:'产品名称'}
+			    ]]
+				,response: {
+			      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+			    }
+			    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+			    	if(res.success){
+				      return {
+				        "code": res.code, //解析接口状态
+				        "msg": res.msg, //解析提示文本
+				        "count": res.data.total, //解析数据长度
+				        "data": res.data.list //解析数据列表
+				      };
+			    	}
+			    }
+			    ,done:function(res, page, count){
+			    	$.each(res.data,function(i,rowData){
+			    		rowData.checked = false;
+			    		$.each(initData.storeAppScopeInfoList,function(j,x){
+			    			if(x.appId==rowData.appId){
+			    				//选中行
+			    				rowData.LAY_CHECKED = true;
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').prop('checked', true);
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+						        rowData.appId = x.appId;
+						        return false;
+			    			}
+			    		});
+			    		
+			    	});
+			    }
+		  });
+	}
+	
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	//layer.alert(JSON.stringify(table.cache.tableData));
+    	//return;
+    	data.field['storeAppId'] = initData.storeAppId;
+    	
+    	if($.isEmptyObject($('#icon').attr('src'))){
+    		layer.msg('应用图标不能为空');
+    		return;
+    	}
+    	data.field['icon'] = $('#icon').attr('src');
+    	
+    	var images = new Array();
+    	$('.screenshot').each(function(){
+    		images.push($(this).attr('src'));
+    	});
+    	data.field['images'] = images.join(',');
+    	
+    	var phaseTag = new Array();
+    	$('input[name="like"]:checked').each(function(){
+    		phaseTag.push($(this).val());
+    	});
+    	data.field['phaseTag'] = phaseTag.join(',');
+    	data.field['enable'] = $('input[name="enable"]').prop("checked");
+    	
+    	//layer.alert(JSON.stringify(data.field));
+    	//return;
+    	//指定范围
+    	if(data.field.appScope==1){
+	    	var array = new Array();
+	    	$.each(table.cache.tableData,function(i,x){
+	    		if(x.LAY_CHECKED){
+	    			var app = {};
+	    			app['appId'] = x.appId;
+	    			array.push(app);
+	    		}
+	    	});
+	    	data.field['storeAppScopeInfoList'] = array;
+	    	
+    		if(array.length<1){
+    			layer.msg('指定应用范围内请选择产品');
+    			return;
+    		}
+    	}
+    	
+        $.ajax({
+			url : 'storeApp/saveStoreApp',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+	
+    form.on('radio(appScope)', function(data){
+		if(data.value==1){
+			$('#tableScope').show();
+			tableScope();
+		}else{
+			$('#tableScope').hide();
+		}
+	});
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+	
+	
+}();
+</script>
+</body>
+</html>

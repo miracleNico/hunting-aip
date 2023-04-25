@@ -1,0 +1,1 @@
+java -jar target\metanet-daas-user.jar

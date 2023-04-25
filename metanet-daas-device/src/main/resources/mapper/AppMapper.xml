@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.AppMapper">
+
+	<select id="appVoList" resultType="work.metanet.api.app.vo.AppVo">
+		select app_id,app_name from t_app where `status`=true
+		<if test="channelId!=null and channelId!=''">
+			and channel_id=#{channelId}
+		</if>
+	</select>
+
+	<update id="removeApp">
+		update t_app set status=false 
+		where app_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.appId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getApp" resultType="work.metanet.model.App">
+		select * from t_app ap where ap.status=true
+		<if test="packageName!=null and packageName!=''">
+			and ap.package_name=#{packageName}		
+		</if>
+	</select>
+	
+	<select id="appInfo" resultType="work.metanet.api.app.protocol.ReqAppInfo$RespAppInfo">
+		select
+			DATE_FORMAT(ap.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			ap.*
+		from t_app ap
+		where 1=1
+			and ap.`status`=true
+			and ap.app_id=#{appId}
+	</select>
+	
+	<select id="appList" resultType="work.metanet.api.app.protocol.ReqAppList$RespAppList">
+		select
+			DATE_FORMAT(ap.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(ap.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			GROUP_CONCAT(
+				CONCAT_WS('/',tb.third_business_name,CONCAT(TRUNCATE(aes.settlement_ratio,0),'%'))
+				separator ' | '	
+			) appEarningsSettingInfos,
+			ap.app_id,
+			ap.channel_id,
+			ch.channel_name,
+			ap.app_name,
+			ap.package_name,
+			ap.app_type,
+			ap.auth_type,
+			ap.instruction,
+			ap.enable_sn,
+			ap.app_key,
+			ap.app_secret,
+			ap.remark
+		from t_app ap
+		left join t_channel ch on ch.channel_id=ap.channel_id
+		left join t_app_earnings_setting aes on aes.status=true and aes.app_id=ap.app_id
+		left join t_third_business tb on tb.`status`=true and tb.third_business_id=aes.third_business_id
+		where 1=1
+			and ap.`status`=true
+			<if test="appId!=null and appId!=''">
+				and ap.app_id=#{appId}			
+			</if>
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}			
+			</if>
+			<if test="app!=null and app!=''">
+				and (ap.app_id like CONCAT('%',#{app},'%') or ap.app_name  like CONCAT('%',#{app},'%'))			
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(ap.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(ap.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and ap.remark like CONCAT('%',#{remark},'%')
+			</if>
+			<if test="appType!=null and appType!=''">
+				and ap.app_type=#{appType}
+			</if>
+			<if test="instruction!=null and instruction!=''">
+				and ap.instruction like CONCAT('%',#{instruction},'%')
+			</if>
+			<if test="packageName!=null and packageName!=''">
+				and ap.package_name like CONCAT('%',#{packageName},'%')
+			</if>
+			<if test="authType!=null and authType!=''">
+				and ap.auth_type=#{authType}
+			</if>
+		GROUP BY ap.app_id
+		order by ap.create_time desc
+	</select>
+	
+	
+	<select id="upgrade" resultType="work.metanet.api.upgradePlan.protocol.ReqUpgrade$RespUpgrade">
+		select
+		up.upgrade_plan_id,
+		avTo.url,
+		avTo.url_type,
+		avTo.md5,
+		avTo.file_size,
+		avTo.version_code,
+		avTo.version_name,
+		avTo.instruction,
+		up.enforce
+		from t_upgrade_plan up
+		join t_app ap on ap.`status`=true and ap.app_id=up.app_id
+		join t_app_version avStart on avStart.status=true and avStart.app_id=ap.app_id and avStart.version_id=up.start_version_id
+		join t_app_version avEnd on avEnd.status=true and avEnd.app_id=ap.app_id and avEnd.version_id=up.end_version_id
+		join t_app_version avTo on avTo.status=true and avTo.app_id=ap.app_id and avTo.version_id=up.to_version_id
+		join t_app_version avDevice on avDevice.status=true and avDevice.app_id=ap.app_id
+		join t_app apDevice on apDevice.`status`=true and apDevice.app_id=avDevice.app_id
+		where 1=1
+		and up.`status`=true
+		and up.send_status=true
+		and up.upgrade_time<![CDATA[<=]]>now()
+		and avDevice.version_code=#{versionCode}
+		and apDevice.package_name=#{packageName}
+		and avDevice.version_code!=avTo.version_code
+		and avDevice.version_code>=avStart.version_code and avDevice.version_code<![CDATA[<=]]>avEnd.version_code
+		and 
+			CASE up.device_scope
+				WHEN '1' THEN (
+				<if test="deviceId!=null and deviceId!=''">
+					select count(1)
+					from t_upgrade_plan_scope ups
+					join t_device dv on dv.brand_id=ups.brand_id
+					where 1=1 
+					and ups.upgrade_plan_id=up.upgrade_plan_id
+					and dv.`status`=true 
+					and dv.device_id=#{deviceId}
+					and 
+						CASE ups.model_scope
+							WHEN '1' THEN FIND_IN_SET(dv.model_id,ups.models)>0
+							ELSE 1=1
+						END
+				</if>
+				<if test="deviceId==null or deviceId==''">
+					select count(1) 
+					from t_upgrade_plan_scope ups
+					join t_brand b on b.brand_id=ups.brand_id
+					join t_model m on m.brand_id=b.brand_id
+					where 1=1
+					and ups.upgrade_plan_id=up.upgrade_plan_id
+					and b.brand_name=#{brandName}
+					and m.model_name=#{modelName}
+					and 
+						CASE ups.model_scope
+							WHEN '1' THEN FIND_IN_SET(m.model_id,ups.models)>0
+							ELSE 1=1
+						END
+				</if>
+				)>0
+				ELSE 1=1
+			END
+		order by avTo.version_code desc 
+		limit 1
+	</select>
+	
+	
+</mapper>

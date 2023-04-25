@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">计划名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="upgradePlanName" placeholder="请输入升级计划名称" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="升级计划名称是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+        <label class="layui-form-label">升级时间</label>
+        <div class="layui-input-inline">
+            <input type="text" name="upgradeTime" id="upgradeTime" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="升级时间是必填项，岂能为空？">
+        </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">产品</label>
+	    <div class="layui-input-inline">
+	         <select name="appId" lay-filter="appId" lay-search="" lay-verify="required" lay-reqtext="产品是必选项，岂能为空？" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">目标版本</label>
+	    <div class="layui-input-inline">
+	         <select name="toVersionId" lay-filter="toVersionId" lay-search="" lay-verify="required" lay-reqtext="版本是必选项，岂能为空？" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">最低版本</label>
+	    <div class="layui-input-inline">
+	         <select name="startVersionId" lay-search="" placeholder="版本范围-默认所有" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">最高版本</label>
+	    <div class="layui-input-inline">
+	         <select name="endVersionId" lay-search="" placeholder="版本范围-默认所有" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">设备范围</label>
+	    <div class="layui-input-inline">
+	        <input type="radio" name="deviceScope" lay-filter="deviceScope" value="0" title="所有" checked="">
+      		<input type="radio" name="deviceScope" lay-filter="deviceScope" value="1" title="指定">
+	    </div>
+    </div>
+  </div>
+  
+  <div id="tableScope" class="layui-form-item">
+  	<div class="layui-inline">
+    	
+    		<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+    	<!-- 
+		   <fieldset class="layui-elem-field" style="width: 620px;">
+		    	<input type="checkbox" name="like[write]" title="品牌1">
+		      	<input type="checkbox" name="like[read]" title="品牌2">
+		      	<input type="checkbox" name="like[game]" title="品牌3">
+		   </fieldset>
+		-->
+    	
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	  	<label class="layui-form-label">强制升级</label>
+	    <div class="layui-input-inline">
+	         <input type="checkbox" name="enforce" lay-skin="switch" lay-filter="switchEnforce" lay-text="是|否">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">发布状态</label>
+	    <div class="layui-input-inline">
+	         <input type="checkbox" name="sendStatus" checked lay-skin="switch" lay-filter="switchSendStatus" lay-text="发布|未发布">
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/select/xm-select.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate;
+	
+	//日期
+    laydate.render({
+        elem: '#upgradeTime'
+        ,type: 'datetime'
+    });
+	
+    load_app();
+	
+	init_data();
+	
+	function init_data(){
+		$('input[name="upgradePlanName"]').val(initData.upgradePlanName);
+		$('input[name="upgradeTime"]').val(initData.upgradeTime);
+		$('textarea[name="remark"]').val(initData.remark);
+		$('input[name="deviceScope"][value='+initData.deviceScope+']').prop('checked',true);
+		$('input[name="enforce"]').prop('checked',initData.enforce);
+		$('input[name="sendStatus"]').prop('checked',initData.sendStatus);
+		form.render();
+		if(!$.isEmptyObject(initData.upgradePlanId)){
+			$('button[type="reset"]').hide();
+		}
+		if(initData.deviceScope==1){
+			$('#tableScope').show();
+			tableScope();
+		}else{
+			$('#tableScope').hide();
+		}
+	}
+	
+	
+	
+	function tableScope(){
+		var tb1 = table.render({
+			    elem: '#tableData'
+			   	,method:'post'
+			   	,contentType:'application/json;charset=utf-8'
+			   	,where:{'pageSize':100}
+			   	,url:'brand/brandSelected'
+				,height: 235
+				,width:625
+			    ,cols: [[
+			       {type: 'checkbox'}
+			      ,{field:'brandId', title:'品牌id',hide:true}
+			      ,{field:'brandName', title:'品牌名称',width:180}
+			      ,{field:'models', title:'型号ids',hide:true}
+			      ,{field:'modelNames', title:'型号', event: 'eventScope', style:'cursor: pointer;',templet:function(d){
+			    	  var models = '';
+			    	  $.each(initData.upgradePlanScopeInfoList,function(i,x){
+			    		  if(x.brandId==d.brandId && !$.isEmptyObject(x.models)){
+			    			  models = x.modelNames;
+			    			  return false;
+			    		  }
+			    	  });
+			    	  return models;
+			      }}
+			    ]]
+				,response: {
+			      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+			    }
+			    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+			    	if(res.success){
+				      return {
+				        "code": res.code, //解析接口状态
+				        "msg": res.msg, //解析提示文本
+				        "count": res.data.total, //解析数据长度
+				        "data": res.data.list //解析数据列表
+				      };
+			    	}
+			    }
+			    ,done:function(res, page, count){
+			    	$.each(res.data,function(i,rowData){
+			    		
+			    		rowData.models = null;
+			    		rowData.modelNames = null;
+			    		rowData.checked = false;
+			    		
+			    		$.each(initData.upgradePlanScopeInfoList,function(j,x){
+			    			if(x.brandId==rowData.brandId){
+			    				
+			    				//选中行
+			    				rowData.LAY_CHECKED = true;
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').prop('checked', true);
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+						        
+						        rowData.models = x.models;
+					        	rowData.modelNames = x.modelNames;
+						        
+						        return false;
+			    			}
+			    		});
+			    		
+			    	});
+			    	
+			    }
+		  });
+	}
+	
+	
+	
+	//监听单元格事件
+	table.on('tool(tableData)', function(obj){
+	    var data = obj.data;
+	    if(obj.event === 'eventScope'){
+	    	$.ajax({
+				url : 'model/brandModelSelected',
+				type : 'POST',
+				contentType : 'application/json;charset=utf-8',
+				dataType : 'json',
+				data:JSON.stringify({'brand':data.brandId,'pageSize':100}),
+				success : function(res) {
+					if(res.success){
+				    	var selectScope;
+				    	layer.open({
+				    		  type: 1,
+				    		  btn: ['确定', '取消'],
+				    		  area: ['420px', '400px'], //宽高
+				    		  content: '<div id="selectScope"></div>',
+				    		  yes:function(index){
+				    			  var modelNames = selectScope.getValue('nameStr');
+				    			  var models = selectScope.getValue('valueStr');
+				    			  obj.update({
+				    				  models:models,
+				    				  modelNames:modelNames
+				    			  })
+				    			  $(obj.tr.selector).find('td[data-field="modelNames"] div').html(modelNames);
+				    			  
+				    			  //选中行
+				    			  table.cache.tableData[obj.tr.index()].LAY_CHECKED = true;
+				    			  $(obj.tr.selector).find('input[type="checkbox"]').prop('checked', true);
+				    			  $(obj.tr.selector).find('input[type="checkbox"]').next().addClass('layui-form-checked');
+				    			  
+				    			  layer.close(index);
+				    		  }
+			    		});
+				    	var selectScope = xmSelect.render({
+				    		el: '#selectScope',
+				    		autoRow: true,
+				    		data: res.data.list,
+				    		prop: {
+				    			name: 'modelName',
+				    			value: 'modelId'
+				    		}
+				    	});
+				    	if(!$.isEmptyObject(data.models)){
+					    	selectScope.setValue(data.models.split(','));				    		
+				    	}
+					}
+				}
+			});
+	    	
+	    }
+	});
+	
+	
+	
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	//layer.alert(JSON.stringify(table.cache.tableData));
+    	//return;
+    	data.field['upgradePlanId'] = initData.upgradePlanId;
+    	data.field['enforce'] = $('input[name="enforce"]').prop("checked");
+    	data.field['sendStatus'] = $('input[name="sendStatus"]').prop("checked");
+    	
+    	//指定范围
+    	if(data.field.deviceScope==1){
+	    	var array = new Array();
+	    	$.each(table.cache.tableData,function(i,x){
+	    		if(x.LAY_CHECKED){
+	    			var brand = {};
+	    			brand['modelScope'] = 0;
+	    			brand['brandId'] = x.brandId;
+	    			brand['models'] = x.models;
+	    			if(!$.isEmptyObject(x.models)){
+	    				brand['modelScope'] = 1;
+	    			}
+	    			array.push(brand);
+	    		}
+	    	});
+	    	data.field['upgradePlanScopeInfoList'] = array;
+    	}
+    	//layer.alert(JSON.stringify(data.field));
+    	//return;
+        $.ajax({
+			url : 'upgradePlan/saveUpgradePlan',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+	
+    form.on('radio(deviceScope)', function(data){
+		if(data.value==1){
+			$('#tableScope').show();
+			tableScope();
+		}else{
+			$('#tableScope').hide();
+		}
+	});
+	
+    form.on('select(appId)', function(){
+		load_version();
+	});
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+    
+    function load_app(){
+  		$.ajax({
+  			url : 'app/appSelected',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'pageSize':100}),
+  			success : function(res) {
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="appId"] option:first').clone(true);
+  						option.val(x.appId);
+  						option.text(x.appName);
+  						$('select[name="appId"]').append(option);
+  					});
+  				}
+ 				$('select[name="appId"]').val(initData.appId);
+				form.render();
+ 				load_version();
+  			}
+  		});
+  	}
+  	
+  	
+  	function load_version(){
+  		var appId = $('select[name="appId"]').val();
+  		$.ajax({
+  			url : 'version/appVersionSelected',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'app':appId,'pageSize':100}),
+  			success : function(res) {
+  				$('select[name="toVersionId"] option:first').nextAll().remove();
+  				$('select[name="startVersionId"] option:first').nextAll().remove();
+  				$('select[name="endVersionId"] option:first').nextAll().remove();
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="toVersionId"] option:first').clone(true);
+  						option.val(x.versionId);
+  						option.text(x.versionCode);
+  						$('select[name="toVersionId"]').append(option);
+  					});
+  					clone_version();
+  				}
+  				$('select[name="toVersionId"]').val(initData.toVersionId);
+  				form.render();
+  			}
+  		});
+  	}
+  	
+  	function clone_version(){
+  		var options = $('select[name="toVersionId"] option:first').nextAll().clone(true);
+  		$('select[name="startVersionId"]').append(options.clone(true));
+  		$('select[name="startVersionId"]').val(initData.startVersionId);
+  		$('select[name="endVersionId"]').append(options.clone(true));
+  		$('select[name="endVersionId"]').val(initData.endVersionId);
+  	}
+	
+	
+}();
+</script>
+</body>
+</html>

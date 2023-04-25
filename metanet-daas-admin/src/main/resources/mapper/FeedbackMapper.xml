@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.FeedbackMapper">
+
+	<update id="removeFeedback">
+		update t_feedback set status=false 
+		where feedback_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.feedbackId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="feedbackList" resultType="work.metanet.api.feedback.protocol.ReqFeedbackList$RespFeedbackList">
+		select
+			fb.feedback_id,
+			ap.app_name,
+			fb.package_name,
+			fb.version_code,
+			fb.content,
+			fb.qq,
+			fb.vx,
+			IFNULL(fb.tel,u.phone) tel,
+			fb.feedback_option_content1,
+			fb.feedback_option_content2,
+			fb.uuid,
+			fb.mac,
+			fb.brand_name,
+			fb.model_name,
+			fb.process_status,
+			fb.remark,
+			DATE_FORMAT(fb.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_feedback fb 
+			LEFT JOIN t_user u on u.user_id=fb.create_user
+			LEFT JOIN t_app ap on ap.package_name=fb.package_name
+		where 1=1
+			and fb.`status`=true
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}			
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(fb.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(fb.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and fb.remark like CONCAT('%',#{remark},'%')
+			</if>
+			<if test="processStatus!=null and processStatus!=''">
+				and fb.process_status=#{processStatus}
+			</if>
+		order by fb.create_time desc
+	</select>
+	
+	
+	
+</mapper>

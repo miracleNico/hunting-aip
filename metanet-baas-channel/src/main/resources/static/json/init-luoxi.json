@@ -1,0 +1,133 @@
+{
+    "clearInfo":{
+        "clearUrl":"api/clear.json"
+    },
+    "logoInfo":{
+        "title":"METANET",
+        "image":"images/logo-metanet.png",
+        "href":"main"
+    },
+    "homeInfo":{
+        "title":"统计",
+        "icon":"fa fa-home",
+        "href":"statistical/statisticalPage"
+    },
+    "menuInfo":{
+        "currency":{
+            "title":"基础信息管理",
+            "icon":"fa fa-address-book",
+            "child":[
+                {
+                    "title":"设备管理",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"设备列表",
+                            "href":"device/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                },
+                {
+                    "title":"SN码管理",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"SN码列表",
+                            "href":"sn/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                },
+                {
+                    "title":"产品管理",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"产品列表",
+                            "href":"app/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        },
+                        {
+                            "title":"版本列表",
+                            "href":"version/listPage",
+                            "icon":"fa fa-navicon",
+                            "target":"_self"
+                        }
+                    ]
+                },
+                {
+                    "title":"用户管理",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"用户积分列表",
+                            "href":"userScore/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                },
+                {
+                    "title":"积分兑换",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"用户积分兑换列表",
+                            "href":"userScoreExchange/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                },
+                {
+                    "title":"收益管理",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"收益列表",
+                            "href":"channelEarnings/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                }
+            ]
+        },
+	    "component": {
+	      "title": "系统管理",
+	      "icon": "fa fa-lemon-o",
+	      "child": [
+                {
+                    "title":"问题反馈",
+                    "href":"",
+                    "icon":"fa fa fa-snowflake-o",
+                    "target":"_self",
+                    "child":[
+                        {
+                            "title":"问题反馈列表",
+                            "href":"feedback/listPage",
+                            "icon":"fa fa-list-alt",
+                            "target":"_self"
+                        }
+                    ]
+                }
+		      ]
+	    }
+    }
+}

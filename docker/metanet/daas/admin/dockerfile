@@ -1,0 +1,15 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+MAINTAINER metanet
+
+# 挂载目录
+VOLUME /home/metanet/daas/admin
+# 创建目录
+RUN mkdir -p /home/metanet/daas/admin
+# 指定路径
+WORKDIR /home/metanet/daas/admin
+# 复制jar文件到路径
+COPY ./jar/metanet-daas-admin.jar /home/metanet/daas/admin/metanet-daas-admin.jar
+# 启动系统服务
+ENTRYPOINT ["java","-jar","metanet-daas-admin.jar"]

@@ -1,0 +1,15 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+MAINTAINER metanet
+
+# 挂载目录
+VOLUME /home/metanet/baas/file
+# 创建目录
+RUN mkdir -p /home/metanet/baas/file
+# 指定路径
+WORKDIR /home/metanet/baas/file
+# 复制jar文件到路径
+COPY ./jar/metanet-baas-file.jar /home/metanet/baas/file/metanet-baas-file.jar
+# 启动文件服务
+ENTRYPOINT ["java","-jar","metanet-baas-file.jar"]

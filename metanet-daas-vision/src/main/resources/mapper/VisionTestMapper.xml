@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionTestMapper">
+
+	<select id="getVisionTestInfo" resultType="work.metanet.api.vision.protocol.ReqVisionTestInfo$RespVisionTestInfo">
+		select
+			vt.eye_id,
+			vt.date_time,
+			vt.device_type,
+			vt.distance,
+			vt.env_light_intensity,
+			vt.time_duration,
+			vt.test_mode,
+			vt.test_id,
+			vt.create_time,
+			vt.update_time,
+			vt.remark
+			from t_vision_test vt
+		where 1=1
+        <if test="testId!=null and testId!=''">
+			and vt.test_id=#{testId}
+		</if>
+			and vt.`status`=true
+		group by vt.test_id
+		limit 1000
+	</select>
+	
+	<select id="getVisionTestList" resultType="work.metanet.api.vision.protocol.ReqVisionTestList$RespVisionTestList">
+		select
+			vt.eye_id,
+			vt.date_time,
+			vt.device_type,
+			vt.distance,
+			vt.env_light_intensity,
+			vt.time_duration,
+			vt.test_mode,
+			vt.test_id,
+			vt.create_time,
+			vt.update_time,
+			vt.remark
+			from t_vision_test vt
+		where 1=1
+		<if test="eyeId!=null and eyeId!=''">
+            and vt.eye_id=#{eyeId}
+        </if>
+        <if test="testId!=null and testId!=''">
+			and vt.test_id=#{testId}
+		</if>
+		<if test="beginTime!=null">
+            and vt.date_time <![CDATA[ >= ]]> #{beginTime}
+    	</if>
+    	<if test="endTime!=null">
+            and vt.date_time <![CDATA[ <= ]]> #{endTime}
+    	</if>
+    	<if test="deviceType!=null">
+			and vt.device_type=#{deviceType}
+		</if>
+    	<if test="distance!=null">
+			and vt.distance=#{distance}
+		</if>		
+			and vt.`status`=true
+		group by vt.test_id
+	</select>
+	
+	<insert id="insertVisionTest">
+		insert into t_vision_test (
+			eye_id,
+			date_time,
+			device_type,
+			distance,
+			env_light_intensity,
+			time_duration,
+			test_mode,
+			test_id,
+			remark               
+		)
+		values (
+			#{eyeId},
+			#{dateTime},
+			#{deviceType},
+			#{distance},
+			#{envLightIntensity},
+			#{timeDuration},
+			#{testMode},
+			#{testId},
+			#{remark} 
+		)
+	</insert>
+	
+	<update id="updateVisionTest">
+		update t_vision_test set
+			date_time=#{dateTime},
+			device_type=#{deviceType},
+			distance=#{distance},
+			env_light_intensity=#{envLightIntensity},
+			time_duration=#{timeDuration},
+			test_mode=#{testMode},
+			test_id=#{testId},
+			remark=#{remark}
+		where 
+			test_id=#{testId}
+	</update>
+	
+	<update id="removeVisionTest">
+		update t_vision_test set
+			status=false
+		where test_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.testId}
+		</foreach>
+		)
+	</update>
+</mapper>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+   
+   <div class="layui-form-item">
+   		<div class="layui-inline">
+		    <label class="layui-form-label">品牌</label>
+		    <div class="layui-input-inline">
+		         <select name="brandId" lay-filter="brandId" lay-search="" lay-verify="required" lay-reqtext="品牌是必选项，岂能为空？" >
+		             <option value=""></option>
+		         </select>
+		    </div>
+		</div>
+   </div> 
+    
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">型号名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="modelName" placeholder="请输入型号名称" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="型号名称是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">型号编号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="modelId" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form;
+	
+	load_brand();
+	init_data();
+	
+	function init_data(){
+		$('input[name="modelId"]').val(initData.modelId);
+		$('input[name="modelName"]').val(initData.modelName);
+		$('textarea[name="remark"]').val(initData.remark);
+		form.render();
+		if(!$.isEmptyObject(initData.modelId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+        $.ajax({
+			url : 'model/saveModel',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+    
+    
+    function load_brand(){
+		$.ajax({
+			url : 'brand/brandSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'pageSize':100}),
+			success : function(res) {
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="brandId"] option:first').clone(true);
+						option.val(x.brandId);
+						option.text(x.brandName);
+						$('select[name="brandId"]').append(option);
+					});
+					$('select[name="brandId"]').val(initData.brandId);
+					form.render();
+				}
+			}
+		});
+	}
+	
+	
+}();
+</script>
+</body>
+</html>

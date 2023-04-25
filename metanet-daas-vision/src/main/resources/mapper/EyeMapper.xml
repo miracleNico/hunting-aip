@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.EyeMapper">
+	<select id="getEyeInfo" resultType="work.metanet.api.vision.protocol.ReqEyeInfo$RespEyeInfo">
+		select
+            e.user_id,
+            e.owner_id,
+            e.owner_name,
+            e.owner_tel,
+            e.owner_age,
+            e.owner_height,
+            e.eye_id,
+            u.username,
+            u.phone,
+            e.type,
+            e.height,
+            e.width,
+            e.pupi_distance,
+            e.length_of_optic_axis,
+            e.corneal_diameter,
+            e.corneal_thickness,
+            e.pupil_diameter,
+            e.intraocular_pressure,    
+            e.radius_curvature,
+            e.refractive_index_for_eyeball,
+            e.radius_curvature_for_retina,
+            e.aperture_for_high_light,
+            e.aperture_for_low_light,
+            e.focus_distance_for_object_space,
+            e.focus_distance_for_image_space,
+            e.focal_power_for_image_space,
+            e.eye_id,
+            e.create_time,
+            e.update_time,
+            e.remark
+
+        from t_eye e
+			left join t_user u on e.user_id=u.user_id
+		where 1=1
+		<if test="eyeId!=null and eyeId!=''">
+            and e.eye_id=#{eyeId}
+        </if>
+        <if test="userId!=null and userId!=''">
+			and u.user_id=#{userId}
+		</if>
+            and e.`status`=true
+		group by e.eye_id
+		limit 1
+	</select>
+	
+	<select id="getEyeList" resultType="work.metanet.api.vision.protocol.ReqEyeList$RespEyeList">
+		select
+            e.user_id,
+            e.owner_id,
+            e.owner_name,
+            e.owner_tel,
+            e.owner_age,
+            e.owner_height,
+            e.eye_id,
+            u.username,
+            u.phone,
+            e.type,
+            e.height,
+            e.width,
+            e.pupi_distance,
+            e.length_of_optic_axis,
+            e.corneal_diameter,
+            e.corneal_thickness,
+            e.pupil_diameter,
+            e.intraocular_pressure,    
+            e.radius_curvature,
+            e.refractive_index_for_eyeball,
+            e.radius_curvature_for_retina,
+            e.aperture_for_high_light,
+            e.aperture_for_low_light,
+            e.focus_distance_for_object_space,
+            e.focus_distance_for_image_space,
+            e.focal_power_for_image_space,
+            e.create_time,
+            e.update_time,
+            e.remark
+
+        from t_eye e
+			left join t_user u on e.user_id=u.user_id
+		where 1=1
+        <if test="userId!=null and userId!=''">
+			and u.user_id=#{userId}
+		</if>
+        <if test="type!=null and type!=''">
+			and e.type=#{type}
+		</if>
+            and e.`status`=true
+		group by e.eye_id
+	</select>
+	
+	<insert id="insertEye">
+		insert into t_eye (
+			user_id,
+			type,
+			owner_id,
+			owner_name,
+			owner_tel,
+			owner_age,
+			owner_height,
+			eye_id,
+			remark               
+		)
+		values (
+			#{userId},
+			#{type},
+			#{ownerId},
+			#{ownerName},
+			#{ownerTel},
+			#{ownerAge},
+			#{ownerHeight},
+			#{eyeId},
+			#{remark} 
+		)
+	</insert>
+	
+	<update id="updateEye">
+		update t_eye set
+			type=#{type},
+			owner_id=#{ownerId},
+			owner_name=#{ownerName},
+			owner_tel=#{ownerTel},
+			owner_age=#{ownerAge},
+			owner_height=#{ownerHeight},
+			remark=#{remark}
+		where 
+			eye_id=#{eyeId}
+	</update>
+	
+	<update id="removeEye">
+		update t_eye set
+			status=false
+		where eye_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.eyeId}
+		</foreach>
+		)
+	</update>
+
+    <select id="eyesInfoByUser" parameterType="string" resultType="work.metanet.api.vision.protocol.ReqEyeInfo$RespEyeInfo">
+        select * from t_eye where user_id = #{userId} order by create_time desc limit 2
+    </select>
+</mapper>

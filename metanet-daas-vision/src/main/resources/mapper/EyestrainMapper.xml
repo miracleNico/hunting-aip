@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.EyestrainMapper">
+    <select id="getEyestrainList" parameterType="work.metanet.api.vision.protocol.ReqEyestrainList"
+            resultType="work.metanet.api.vision.protocol.ReqEyestrainList$RespEyestrainList">
+        select
+        user_id,
+        eye_id,
+        date_time,
+        use_type,
+        time_duration,
+        use_mode,
+        eyestrain_id,
+        create_time,
+        update_time,
+        remark
+        from t_eyestrain
+        <where>
+            status = 1
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="useMode != null and useMode != -1">
+                and use_mode = #{useMode}
+            </if>
+            <if test="eyeId != null and eyeId != ''">
+                and eye_id = #{eyeId}
+            </if>
+            <if test="useType != null and useType != -1">
+                and use_type = #{useType}
+            </if>
+            <if test="eyestrainId != null and eyestrainId != ''">
+                and eyestrain_id = #{eyestrainId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getEyestrainListOrderByUseTypeAndGroupByTime"
+            parameterType="work.metanet.api.vision.protocol.ReqEyestrainList"
+            resultType="work.metanet.api.vision.protocol.ReqEyestrainList$RespEyestrainList">
+        <include refid="last_week_eyestrain"/>
+        select a.user_id, a.create_time, a.use_type, b.create_time bct, b.sumDuration, b.user_id bui
+        from eyestrain_temp as a
+                 left join
+             (select sum(time_duration) as sumDuration, user_id, use_type, create_time
+              from t_eyestrain
+              where user_id = #{userId}
+              group by date (create_time),
+             use_type
+        order by date (create_time) desc) as b
+        on a.user_id = b.user_id and date (a.create_time) = date (b.create_time) and a.user_id = b.user_id and a.use_type = b.use_type
+        group by a.use_type, a.create_time
+        order by date (a.create_time);
+    </select>
+
+    <select id="getUserEyestrainInfo" parameterType="work.metanet.api.vision.protocol.ReqEyestrainInfo"
+            resultType="work.metanet.api.vision.protocol.ReqEyestrainInfo$RespEyestrainInfo">
+        select * from t_eyestrain
+        <where>
+            <if test="eyestrainId != null and eyestrainId != ''">
+                and eyestrain_id = #{eyestrainId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getEyestrainInfo" parameterType="work.metanet.api.vision.protocol.ReqEyestrainInfo"
+            resultType="work.metanet.api.vision.protocol.ReqEyestrainInfo$RespEyestrainInfo">
+        select
+        user_id,
+        eye_id,
+        date_time,
+        use_type,
+        time_duration,
+        use_mode,
+        eyestrain_id,
+        remark
+        from t_eyestrain
+        <where>
+            status = 1
+            <if test="eyestrainId != null and eyestrainId != ''">
+                and eyestrain_id = #{eyestrainId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="eyestrainsInfoByUser" parameterType="string"
+            resultType="work.metanet.api.vision.protocol.ReqEyestrainInfo$RespEyestrainInfo">
+        select user_id,
+               eye_id,
+               date_time,
+               use_type,
+               time_duration,
+               use_mode,
+               eyestrain_id
+        from t_eyestrain
+        where user_id = #{userId}
+          and status = 1
+    </select>
+
+    <insert id="insertEyestrain" parameterType="work.metanet.api.vision.protocol.ReqSaveEyestrain">
+        insert into t_eyestrain
+        (user_id,
+         eye_id,
+         date_time,
+         use_type,
+         time_duration,
+         use_mode,
+         eyestrain_id,
+         remark)
+        values (#{userId},
+                #{eyeId},
+                #{dateTime},
+                #{useType},
+                #{timeDuration},
+                #{useMode},
+                #{eyestrainId},
+                #{remark});
+    </insert>
+
+    <update id="removeEyestrain" parameterType="work.metanet.api.vision.protocol.ReqRemoveEyestrain">
+        update t_eyestrain
+        set status = 0
+        where eyestrain_id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.eyestrainId}
+        </foreach>
+    </update>
+
+    <update id="updateEyestrain" parameterType="work.metanet.api.vision.protocol.ReqSaveEyestrain">
+        update t_eyestrain
+        <set>
+            <if test="dateTime != null">date_time = #{dateTime},</if>
+            <if test="useType != null">use_type = #{useType},</if>
+            <if test="timeDuration != null">time_duration = #{timeDuration},</if>
+            <if test="useMode != null">use_mode = #{useMode},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+        </set>
+        <where>
+            <if test="userId != null  and userId != ''">and user_id = #{userId}</if>
+            <if test="eyeId != null and eyeId != ''">and eye_id = #{eyeId}</if>
+            <if test="eyestrainId != null and eyestrainId != ''">and eyestrain_id = #{eyestrainId}</if>
+        </where>
+    </update>
+
+    <sql id="last_week_eyestrain">
+        drop table if exists eyestrain_temp;
+        create
+        temporary table eyestrain_temp (
+            user_id varchar(64) not null ,
+            create_time timestamp not null default current_timestamp,
+            use_type int not null
+        );
+        insert into eyestrain_temp (user_id, CREATE_TIME, use_type)
+        values (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 2);
+    </sql>
+</mapper>

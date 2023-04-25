@@ -1,0 +1,16 @@
+{
+    "logoInfo":{
+        "title":"METANET",
+        "image":"images/logo.png",
+        "href":"main"
+    },
+    "homeInfo":{
+        "title":"统计",
+        "icon":"fa fa-home",
+        "href":"statistical/statisticalPage"
+    },
+    "menuInfo":{
+        "currency":{},
+	    "component": {}
+    }
+}

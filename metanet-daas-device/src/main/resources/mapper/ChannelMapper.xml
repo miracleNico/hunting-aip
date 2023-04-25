@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.ChannelMapper">
+
+	<update id="removeChannel">
+		update t_channel set status=false 
+		where channel_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.channelId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getChannel" resultType="work.metanet.model.Channel">
+		select * from t_channel ch where 1=1
+		and ch.status=true
+		<if test="channelName!=null and channelName!=''">
+			and ch.channel_name=#{channelName}		
+		</if>
+		<if test="username!=null and username!=''">
+			and ch.username=#{username}		
+		</if>
+		<if test="password!=null and password!=''">
+			and ch.password=#{password}		
+		</if>
+	</select>
+	
+	<select id="channelInfo" resultType="work.metanet.api.channel.protocol.ReqChannelInfo$RespChannelInfo">
+		select
+			ch.channel_id,
+			ch.channel_name,
+			ch.username,
+			ch.remark,
+			DATE_FORMAT(ch.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_channel ch
+		where 1=1
+			and ch.`status`=true 
+			and ch.channel_id=#{channelId}
+	</select>
+	
+	<select id="channelList" resultType="work.metanet.api.channel.protocol.ReqChannelList$RespChannelList">
+		select
+			ch.channel_id,
+			ch.channel_name,
+			ch.username,
+			ch.remark,
+			GROUP_CONCAT(r.role_name order by r.update_time) roleNames,
+			DATE_FORMAT(ch.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_channel ch
+		left join t_auth_admin_role ar on ar.admin_id=ch.channel_id
+		left join t_auth_role r on r.`status`=true and r.role_id=ar.role_id
+		where 1=1
+		and ch.`status`=true
+		<if test="channel!=null and channel!=''">
+			and (ch.channel_id like CONCAT('%',#{channel},'%') or ch.channel_name  like CONCAT('%',#{channel},'%'))			
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			and DATE_FORMAT(ch.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			and DATE_FORMAT(ch.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+		</if>
+		<if test="remark!=null and remark!=''">
+			and ch.remark like CONCAT('%',#{remark},'%')
+		</if>
+		group by ch.channel_id
+		order by ch.update_time desc
+	</select>
+	
+	
+	
+</mapper>

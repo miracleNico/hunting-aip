@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.OpenDeviceMapper">
+
+	<select id="deviceList" resultType="work.metanet.api.openDevice.protocol.ReqOpenDeviceList$RespOpenDeviceList">
+		select
+			c.channel_name,
+			oa.app_name,
+			od.*
+		from t_open_device od
+		join t_open_app oa on oa.app_id=od.app_id
+		join t_channel c on c.channel_id=oa.channel_id
+		where 1=1
+			and od.`status`=true
+			and oa.`status`=true
+			and c.`status`=true
+			<if test="appId!=null and appId!=''">
+				and od.app_id=#{appId}			
+			</if>
+			<if test="channelId!=null and channelId!=''">
+				and oa.channel_id=#{channelId}			
+			</if>
+			<if test="enable!=null">
+				and od.enable=${enable}
+			</if>
+			<if test="deviceId!=null and deviceId!=''">
+				and od.device_id like CONCAT('%',#{deviceId},'%')
+			</if>
+			<if test="mac!=null and mac!=''">
+				and od.mac like CONCAT('%',#{mac},'%')
+			</if>
+			<if test="sn!=null and sn!=''">
+				and od.sn like CONCAT('%',#{sn},'%')
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(od.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(od.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and od.remark like CONCAT('%',#{remark},'%')
+			</if>
+		order by od.create_time desc
+	</select>
+	
+	
+	
+</mapper>

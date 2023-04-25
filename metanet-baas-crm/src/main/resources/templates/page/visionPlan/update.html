@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<div style="margin-left: 20px;margin-top: 10px">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">用户ID</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="userId" autocomplete="off" disabled  class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">计划ID</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="planId" autocomplete="off" disabled  class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">计划名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="planName" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">提醒类型</label>
+                <div class="layui-input-inline">
+                    <select name="planType" lay-search="">
+                        <option value="">--请选择--</option>
+                        <option value="0">年提醒</option>
+                        <option value="1">月提醒</option>
+                        <option value="2">周提醒</option>
+                        <option value="3">天提醒</option>
+                        <option value="4">小时提醒</option>
+                        <option value="5">一次性提醒</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">执行模式</label>
+                <div class="layui-input-inline">
+                    <select name="actionMode" lay-search="">
+                        <option value="">--请选择--</option>
+                        <option value="0">状态栏提醒</option>
+                        <option value="1">弹出框提醒</option>
+                        <option value="2">立即强制切换</option>
+                        <option value="3">倒计时切换可取消</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">计划操作</label>
+                <div class="layui-input-inline">
+                    <select name="planAction" lay-search="">
+                        <option value="">--请选择--</option>
+                        <option value="0">视力测试</option>
+                        <option value="1">视力防护</option>
+                        <option value="2">其他</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="startDate" id="startDate" autocomplete="off" class="layui-input"
+                           placeholder="开始时间">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="endDate" id="endDate" autocomplete="off" class="layui-input"
+                           placeholder="结束时间" >
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-inline" style="width: 500px;">
+                    <textarea name="remark" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">修改</a>
+                <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    var initData = [[${info}]];
+</script>
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+    ;!function () {
+        let $ = layui.$,
+            layer = layui.layer,
+            table = layui.table,
+            form = layui.form,
+            laydate = layui.laydate,
+            upload = layui.upload;
+
+        //日期
+        laydate.render({
+            elem: '#startDate'
+            , type: 'datetime'
+        });
+
+        laydate.render({
+            elem: '#endDate'
+            , type: 'datetime'
+        });
+        init();
+
+        //监听添加操作
+        form.on('submit(data-search-btn)', function (data) {
+            $.ajax({
+                url : '/vision/plan/visionPlanUpdate',
+                type : 'POST',
+                contentType : 'application/json;charset=utf-8',
+                dataType : 'json',
+                data:JSON.stringify(data.field),
+                success : function(res) {
+                    if(res.success){
+                        let index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        parent.layer.close(index);
+                        parent.layer.msg(res.msg,{icon:1});
+                        parent.layui.table.reload('tableData')
+                    }
+                }
+            });
+        });
+
+        function init() {
+            $('input[name="userId"]').val(initData.userId);
+            $('input[name="planId"]').val(initData.planId);
+            $('input[name="planName"]').val(initData.planName);
+            $('select[name="planType"]').val(initData.planType);
+            $('select[name="planAction"]').val(initData.planAction);
+            $('select[name="actionMode"]').val(initData.actionMode);
+            $('input[name="startDate"]').val(initData.startDate);
+            $('input[name="endDate"]').val(initData.endDate);
+            $('textarea[name="remark"]').val(initData.remark);
+            form.render();
+        }
+    }();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.DeviceAppMapper">
+	
+	<select id="getDeviceApp" resultType="work.metanet.model.DeviceApp">
+		select
+			da.*
+		from t_device_app da
+			join t_app ap on ap.app_id=da.app_id
+		where 1=1
+		<if test="deviceId!=null and deviceId!=''">
+			and da.device_id=#{deviceId}
+		</if>
+		<if test="appId!=null and appId!=''">
+			and da.app_id=#{appId}
+		</if>
+		<if test="appName!=null and appName!=''">
+			and ap.app_name=#{appName}			
+		</if>
+		<if test="packageName!=null and packageName!=''">
+			and ap.package_name=#{packageName}
+		</if>
+	</select>
+	
+	<select id="deviceAppDeailList" resultType="work.metanet.api.device.vo.DeviceAppVo">
+		select
+			da.app_id,
+			ap.app_name,
+			da.sn_code,
+			DATE_FORMAT(da.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+			DATE_FORMAT(da.activate_time,'%Y-%m-%d %H:%i:%s') activate_time
+		from t_device_app da
+			join t_app ap on ap.app_id=da.app_id
+		where 1=1
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}
+			</if>
+			and da.device_id=#{deviceId}
+	</select>
+	
+	
+</mapper>

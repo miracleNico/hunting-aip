@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+   
+   <div class="layui-form-item">
+   	  <div class="layui-inline">
+   		<label class="layui-form-label">渠道</label>
+	    <div class="layui-input-inline">
+	         <select name="channelId" lay-search="" lay-verify="required" lay-reqtext="渠道是必选项，岂能为空？" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+	  </div>
+	  <div class="layui-inline">
+		    <label class="layui-form-label">认证方式</label>
+		    <div class="layui-input-inline">
+		         <select name="authType" lay-search="" lay-verify="required" lay-reqtext="认证方式是必选项，岂能为空？" >
+		             <option value=""></option>
+	                 <option value="MACSN">mac+序列号认证</option>
+	                 <option value="MAC">mac认证</option>
+	                 <option value="SN">序列号认证</option>
+		         </select>
+		    </div>
+	    </div>
+   </div> 
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">产品名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="appName" placeholder="请输入产品名称" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="产品名称是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+	    <label class="layui-form-label">产品类型</label>
+	    <div class="layui-input-inline">
+	         <select name="appType" lay-search="" lay-verify="required" lay-reqtext="类型是必选项，岂能为空？" >
+	             <option value=""></option>
+	             <option value="0">APP</option>
+	             <option value="1">固件</option>
+	         </select>
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">产品包名</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="packageName" placeholder="请输入产品包名" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="包名是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline layui-icon layui-icon-help" title="启用则用户需要手动输入激活码激活，禁用则在设备认证时系统会自动获取一个激活码激活。【对应产品的激活码需要调整最大使用次数】">
+	    <label class="layui-form-label">输入激活码激活</label>
+	    <div class="layui-input-inline">
+	         <input type="checkbox" name="enableSn" checked lay-skin="switch" lay-filter="switchEnableSn" lay-text="启用|禁用">
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+    	<table id="tableData" lay-filter="tableData"></table>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">产品说明</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="instruction" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,slider = layui.slider;
+	
+	load_channel();
+	init_data();
+	
+	function init_data(){
+		$('input[name="appName"]').val(initData.appName);
+		$('input[name="packageName"]').val(initData.packageName);
+		$('textarea[name="instruction"]').val(initData.instruction);
+		$('textarea[name="remark"]').val(initData.remark);
+		if($.isEmptyObject(initData.authType)){
+			$('select[name="authType"] option:eq(1)').attr('selected','selected');
+		}else{
+			$('select[name="authType"]').val(initData.authType);		
+		}
+		if(initData.enableSn!=null){
+			$('input[name="enableSn"]').prop('checked',initData.enableSn);
+		}
+		if($.isEmptyObject(initData.appType)){
+			$('select[name="appType"] option:eq(1)').attr('selected','selected');
+		}else{
+			$('select[name="appType"]').val(initData.appType);		
+		}
+		form.render();
+		showTableData();
+		if(!$.isEmptyObject(initData.appId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	function showTableData(){
+		var tb1 = table.render({
+			    elem: '#tableData'
+			   	,method:'post'
+			   	,contentType:'application/json;charset=utf-8'
+			   	,where:{'pageSize':100}
+			   	,url:'thirdBusiness/thirdBusinessSelected'
+		   		,height: 200
+				,width:625
+			    ,cols: [[
+			       {type: 'checkbox'}
+			      ,{field:'thirdBusinessId', title:'id',hide:true}
+			      ,{field:'thirdBusinessName', title:'第三方内容商名称',width:160}
+			      ,{field:'settlementRatio', title:'渠道收益结算占比(%)', templet: function(d){
+			    	  return '<div id="slider_'+d.thirdBusinessId+'" class="demo-slider" style="margin-top: 14px;"></div>';
+			      }}
+			    ]]
+				,response: {
+			      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+			    }
+			    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+			    	if(res.success){
+				      return {
+				        "code": res.code, //解析接口状态
+				        "msg": res.msg, //解析提示文本
+				        "count": res.data.total, //解析数据长度
+				        "data": res.data.list //解析数据列表
+				      };
+			    	}
+			    }
+			    ,done:function(res, page, count){
+			    	$.each(res.data,function(i,rowData){
+			    		//渲染滑块
+			    		slider.render({
+			    		    elem: '#slider_'+rowData.thirdBusinessId
+			    		    ,tips: false
+							,input:true
+			    		});
+			    		
+			    		rowData.checked = false;
+			    		$.each(initData.appEarningsSettings,function(j,x){
+			    			if(x.thirdBusinessId==rowData.thirdBusinessId){
+			    				//选中行
+			    				rowData.LAY_CHECKED = true;
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').prop('checked', true);
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+						      	//渲染滑块默认值
+					    		slider.render({
+					    		    elem: '#slider_'+rowData.thirdBusinessId
+					    		    ,tips: false
+									,value: x.settlementRatio
+									,input:true
+					    		});
+						        return false;
+			    			}
+			    		});
+			    	});
+			    }
+		  });
+	}
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	var array = new Array();
+    	data.field['appId'] = initData.appId;
+    	data.field['enableSn'] = $('input[name="enableSn"]').prop("checked");
+    	$.each(table.cache.tableData,function(i,x){
+    		if(x.LAY_CHECKED){
+    			var appEarningsSettings = {};
+    			appEarningsSettings['thirdBusinessId'] = x.thirdBusinessId;
+    			appEarningsSettings['settlementRatio'] = $('#slider_'+x.thirdBusinessId+' input').val();
+    			array.push(appEarningsSettings);
+    		}
+    	});
+    	data.field['appEarningsSettings'] = array;
+        $.ajax({
+			url : 'app/saveApp',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+    
+    function load_channel(){
+		$.ajax({
+			url : 'channel/channelSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'pageSize':100}),
+			success : function(res) {
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="channelId"] option:first').clone(true);
+						option.val(x.channelId);
+						option.text(x.channelName);
+						$('select[name="channelId"]').append(option);
+					});
+					$('select[name="channelId"]').val(initData.channelId);
+					form.render();
+				}
+			}
+		});
+	}
+	
+	
+}();
+</script>
+</body>
+</html>

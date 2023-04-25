@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+  <div class="layui-form-item">
+  	<div class="layui-input-block">
+ 		<label class="layui-form-label">原密码</label>
+	    <div class="layui-input-inline">
+	      <input type="password" name="oldPassword" placeholder="请输入原密码" autocomplete="off" class="layui-input" lay-verify="pass" >
+	    </div>
+  	</div>
+  </div>
+  <div class="layui-form-item">
+  	<div class="layui-input-block">
+ 		<label class="layui-form-label">新密码</label>
+	    <div class="layui-input-inline">
+	      <input type="password" name="newPassword" placeholder="请输入新密码" autocomplete="off" class="layui-input" lay-verify="pass" >
+	    </div>
+  	</div>
+  </div>
+  <div class="layui-form-item">
+  	<div class="layui-input-block">
+ 		<label class="layui-form-label">确认密码</label>
+	    <div class="layui-input-inline">
+	      <input type="password" name="confirmPassword" placeholder="请输入确认密码" autocomplete="off" class="layui-input" lay-verify="pass" >
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form;
+	
+	
+	
+	
+	//自定义验证规则
+	form.verify({
+	  pass: [
+	    /^[\S]{6,12}$/
+	    ,'密码必须6到12位，且不能出现空格'
+	  ]
+	});
+	
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	if(data.field['newPassword']!=data.field['confirmPassword']){
+    		layer.msg('确认密码与新密码不一致',{icon:5,shift:6});
+    		return;
+    	}
+        $.ajax({
+			url : 'channel/updChannelPassword',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg);
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+    
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+	
+	
+}();
+</script>
+</body>
+</html>

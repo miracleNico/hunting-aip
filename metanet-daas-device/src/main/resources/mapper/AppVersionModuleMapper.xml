@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.AppVersionModuleMapper">
+	
+	<select id="viewAppVersionModule" resultType="work.metanet.api.versionModule.protocol.ReqViewAppVersionModule$RespViewAppVersionModule">
+		select
+			avm.module_name,
+			avm.call_type,
+			avm.parent_id,
+			avm.module_icon,
+			avm.package_name,
+			avm.class_name,
+			avm.parameter,
+			avm.sort,
+			b.business_code,
+			GROUP_CONCAT(ba.app_url) businessAppsUrl
+		from t_app_version_module avm
+			join t_app_version av on av.version_id=avm.version_id
+			join t_app ap on ap.app_id=av.app_id
+			left join t_business_app ba on ba.`status`=true and FIND_IN_SET(ba.business_app_id,avm.business_app_ids)
+			left join t_business b on b.`status`=true and b.business_id=ba.business_id
+		where 1=1
+			and avm.`status`=true
+			and ap.`status`=true
+			and av.`status`=true
+			and ap.package_name=#{packageName}
+			and av.version_code=#{versionCode}
+		GROUP BY avm.version_module_id
+		ORDER BY avm.sort
+	</select>
+
+	<update id="removeAppVersionModule">
+		update t_app_version_module set status=false
+		where version_module_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.versionModuleId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getAppVersionModule" resultType="work.metanet.model.AppVersionModule">
+		select * from t_app_version_module where status=true 
+		<if test="versionId!=null and versionId!=''">
+			and version_id=#{versionId}
+		</if>
+		<if test="moduleName!=null and moduleName!=''">
+			and module_name=#{moduleName}
+		</if>
+	</select>
+	
+	<select id="appVersionModuleInfo" resultType="work.metanet.api.versionModule.protocol.ReqAppVersionModuleInfo$RespAppVersionModuleInfo">
+		select *
+		from t_app_version_module
+		where `status`=true 
+		and version_module_id=#{versionModuleId}
+	</select>
+	
+	<select id="appVersionModuleList" resultType="work.metanet.api.versionModule.protocol.ReqAppVersionModuleList$RespAppVersionModuleList">
+		select
+			true `open`,
+			avm.*
+		from t_app_version_module avm
+		where avm.`status`=true
+			<if test="versionId!=null and versionId!=''">
+				and avm.version_id=#{versionId}
+			</if>
+		order by avm.sort asc
+	</select>
+	
+	
+	
+</mapper>

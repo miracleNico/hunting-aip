@@ -1,0 +1,7 @@
+# 基础镜像
+FROM seataio/seata-server
+# author
+MAINTAINER metanet
+
+# 复制conf文件到路径
+COPY ./conf/application.yml /home/seata/conf/application.yml

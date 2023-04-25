@@ -1,0 +1,15 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+MAINTAINER metanet
+
+# 挂载目录
+VOLUME /home/metanet/baas/openapi
+# 创建目录
+RUN mkdir -p /home/metanet/baas/openapi
+# 指定路径
+WORKDIR /home/metanet/baas/openapi
+# 复制jar文件到路径
+COPY ./jar/metanet-baas-openapi.jar /home/metanet/baas/openapi/metanet-baas-openapi.jar
+# 启动系统服务
+ENTRYPOINT ["java","-jar","metanet-baas-openapi.jar"]

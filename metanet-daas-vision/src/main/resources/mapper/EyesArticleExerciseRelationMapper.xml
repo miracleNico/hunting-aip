@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.EyesArticleExerciseRelationMapper">
+
+    <select id="getreaeri" parameterType="work.metanet.api.vision.protocol.ReqEyesArticleExerciseRelationInfo"
+            resultType="work.metanet.api.vision.protocol.ReqEyesArticleExerciseRelationInfo$RespEyesArticleExerciseRelationInfo">
+        select *
+        from t_article_exercise
+        where article_exercise_id = #{articleExerciseId}
+    </select>
+
+    <select id="getreaerl"
+            resultType="work.metanet.api.vision.protocol.ReqEyesArticleExerciseRelationInfo$RespEyesArticleExerciseRelationInfo">
+        select *
+        from t_article_exercise;
+    </select>
+
+    <insert id="insertreaerl" parameterType="work.metanet.api.vision.protocol.ReqEyesArticleExerciseRelationInfo">
+        insert into t_article_exercise
+            value (
+            article_exercise_id,
+            eyes_article_id,
+            exercise_id
+        )
+        values (
+            #{articleExerciseId},
+            #{eyesArticleId},
+            #{exerciseId}
+            )
+    </insert>
+
+    <update id="updatetreaerl" parameterType="work.metanet.api.vision.protocol.ReqEyesArticleExerciseRelationInfo">
+        update from t_article_exercise
+        <set>
+            <if test="eyesArticleId != null and eyesArticleId != ''">eyes_article_id = #{eyesArticleId},</if>
+            <if test="exerciseId != null and exerciseId != ''">exercise_id = #{exerciseId},</if>
+        </set>
+        <where>
+            <if test="article_exercise_id != null and article_exercise_id ! = ''">
+                article_exercise_id = #{articleExerciseId}
+            </if>
+        </where>
+    </update>
+    
+    <update id="removetreaerl" parameterType="work.metanet.api.vision.protocol.ReqRemoveEyesArticleExerciseRelation">
+        update from t_article_exercise
+        <set>
+          status = 1
+        </set>
+        <where>
+            <if test="article_exercise_id != null and article_exercise_id ! = ''">
+                article_exercise_id = #{articleExerciseId}
+            </if>
+        </where>
+    </update>
+</mapper>

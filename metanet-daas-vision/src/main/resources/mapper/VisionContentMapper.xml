@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionContentMapper">
+
+    <select id="visionContentList" parameterType="work.metanet.api.visionContent.protocol.ReqVisionContentList"
+            resultType="work.metanet.api.visionContent.protocol.ReqVisionContentList$RespVisionContentList">
+        select
+        content_id,
+        `name`,
+        display_title,
+        digest,
+        keyword,
+        industry,
+        type1,
+        type2,
+        type3,
+        text,
+        video_url,
+        audio_url,
+        cover_picture_url,
+        `order`,
+        external_link,
+        type4,
+        is_full_screen,
+        remark,
+        create_time,
+        update_time
+        from t_content
+        <where>
+            status = 1
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="digest != null and digest != ''">
+                and digest = #{digest}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and keyword = #{keyword}
+            </if>
+            <if test="industry != null and industry != -1 ">
+                and industry = #{industry}
+            </if>
+            <if test="type1 != null and type1 != -1">
+                and type1 = #{type1}
+            </if>
+            <if test="type2 != null and type2 != -1">
+                and type2 = #{type2}
+            </if>
+            <if test="type3 != null and type3 != -1">
+                and type3 = #{type3}
+            </if>
+            <if test="type4 != null and type4 != -1">
+                and type4 = #{type4}
+            </if>
+        </where>
+        order by `order` desc
+    </select>
+
+    <select id="visionContentInfo" parameterType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo"
+            resultType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo$RespVisionContentInfo">
+        select
+        content_id,
+        `name`,
+        display_title,
+        digest,
+        keyword,
+        industry,
+        type1,
+        type2,
+        type3,
+        text,
+        video_url,
+        audio_url,
+        cover_picture_url,
+        `order`,
+        external_link,
+        type4,
+        is_full_screen,
+        remark,
+        create_time,
+        update_time
+        from t_content
+        <where>
+            status = 1
+            <if test="contentId != null and contentId != ''">
+                and content_id = #{contentId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertVisionContent" parameterType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo">
+        insert into t_content
+        (content_id,
+         `name`,
+         display_title,
+         digest,
+         keyword,
+         industry,
+         type1,
+         type2,
+         type3,
+         text,
+         video_url,
+         audio_url,
+         cover_picture_url,
+         `order`,
+         external_link,
+         type4,
+         is_full_screen,
+         remark,
+         create_time,
+         update_time)
+        values (#{contentId},
+                #{name},
+                #{displayTitle},
+                #{digest},
+                #{keyword},
+                #{industry},
+                #{type1},
+                #{type2},
+                #{type3},
+                #{text},
+                #{videoUrl},
+                #{audioUrl},
+                #{coverPictureUrl},
+                #{order},
+                #{externalLink},
+                #{type4},
+                #{isFullScreen},
+                #{remark},
+                #{createTime},
+                #{updateTime})
+    </insert>
+
+
+    <update id="updateVisionContent" parameterType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo">
+        update t_content
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="displayTitle != null and displayTitle != ''">
+                display_title = #{displayTitle},
+            </if>
+            <if test="digest != null and digest != ''">
+                digest = #{digest},
+            </if>
+            <if test="keyword != null and keyword != ''">
+                keyword = #{keyword},
+            </if>
+            <if test="industry != null and industry != -1 ">
+                industry = #{industry},
+            </if>
+            <if test="type1 != null and type1 != -1">
+                type1 = #{type1},
+            </if>
+            <if test="type2 != null and type2 != -1">
+                type2 = #{type2},
+            </if>
+            <if test="type3 != null and type3 != -1">
+                type3 = #{type3},
+            </if>
+            <if test="type4 != null and type4 != -1">
+                type4 = #{type4},
+            </if>
+            <if test="text != null and text != ''">
+                text = #{text},
+            </if>
+            <if test="videoUrl != null and videoUrl != ''">
+                video_url = #{videoUrl},
+            </if>
+            <if test="audioUrl != null and audioUrl != ''">
+                audio_url = #{audioUrl},
+            </if>
+            <if test="coverPictureUrl != null and coverPictureUrl != ''">
+                cover_picture_url = #{coverPictureUrl},
+            </if>
+            <if test="externalLink != null and externalLink != ''">
+                external_link = #{externalLink},
+            </if>
+            <if test="order != null">
+                `order` = #{order},
+            </if>
+            <if test="isFullScreen != null and isFullScreen != -1">
+                is_full_screen = #{isFullScreen},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+        </set>
+        <where>
+            content_id = #{contentId}
+        </where>
+    </update>
+
+    <update id="removeVisionContents" parameterType="work.metanet.api.visionContent.protocol.ReqRemoveVisionContent">
+        update
+        t_content
+        <set>
+            status = 0
+        </set>
+        <where>
+            content_id in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                #{item.contentId}
+            </foreach>
+        </where>
+    </update>
+
+
+    <select id="getCount" parameterType="int" resultType="int">
+        select count(1)
+        from
+        (select * from t_content where status = 1
+        <if test="ids != null and ids.size > 0">
+            and content_id not in
+            <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        ) a
+        where type1 = #{type1}
+    </select>
+
+    <select id="getRandomContent" parameterType="map"
+            resultType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo$RespVisionContentInfo">
+        select *
+        from
+        (select * from t_content where
+        status = 1
+        <if test="contentIds != null and contentIds.size > 0">
+            and content_id not in
+            <foreach collection="contentIds" item="contentId" open="(" close=")" separator=",">
+                #{contentId}
+            </foreach>
+        </if>
+        ) a
+        where type1 = #{type1}
+        limit #{num}
+        , 1
+    </select>
+
+    <select id="getTypeCount" resultType="int">
+        select type1
+        from t_content
+        where status = 1
+        group by type1
+    </select>
+    <!--select count(1)
+        from (select * from t_content group by type1) t-->
+
+    <select id="getExerciseType"
+            resultType="work.metanet.api.visionContent.protocol.ReqVisionContentInfo$RespVisionContentInfo">
+        select type1
+        from t_content
+        group by type1
+    </select>
+
+    <select id="getAllCount" resultType="int">
+        select count(1)
+        from
+        (select * from t_content where status = 1
+        <if test="contentIds != null and contentIds.size > 0">
+            and content_id not in
+            <foreach collection="contentIds" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        ) a
+    </select>
+
+</mapper>

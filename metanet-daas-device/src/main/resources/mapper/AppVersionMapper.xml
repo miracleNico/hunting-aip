@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.AppVersionMapper">
+
+	<update id="removeAppVersion">
+		update t_app_version set status=false
+		where version_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.versionId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getAppVersion" resultType="work.metanet.model.AppVersion">
+		select 
+			av.*
+		from t_app_version av 
+			join t_app ap on ap.app_id=av.app_id
+		where av.`status`=true
+		<if test="versionId!=null and versionId!=''">
+			and av.version_id=#{versionId}		
+		</if>
+		<if test="appId!=null and appId!=''">
+			and ap.app_id=#{appId}
+		</if>
+		<if test="versionCode!=null and versionCode!=''">
+			and av.version_code=#{versionCode}		
+		</if>
+		<if test="packageName!=null and packageName!=''">
+			and ap.package_name=#{packageName}		
+		</if>
+		<if test="appName!=null and appName!=''">
+			and ap.app_name=#{appName}
+		</if>
+	</select>
+	
+	<select id="appVersionInfo" resultType="work.metanet.api.version.protocol.ReqAppVersionInfo$RespAppVersionInfo">
+		select
+			ap.channel_id,
+			ap.app_id,
+			ap.app_name,
+			DATE_FORMAT(av.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			av.*
+		from t_app_version av
+			left join t_app ap on ap.app_id=av.app_id
+		where 1=1
+			and av.`status`=true
+			and av.version_id=#{versionId}
+	</select>
+	
+	<select id="appVersionList" resultType="work.metanet.api.version.protocol.ReqAppVersionList$RespAppVersionList">
+		select
+			ap.app_id,
+			ap.app_name,
+			DATE_FORMAT(av.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(av.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			av.*
+		from t_app_version av
+			left join t_app ap on ap.app_id=av.app_id
+		where av.`status`=true
+			<if test="channelId!=null and channelId!=''">
+				and ap.channel_id=#{channelId}
+			</if>
+			<if test="version!=null and version!=''">
+				and (av.version_code like CONCAT('%',#{version},'%') or av.version_name  like CONCAT('%',#{version},'%'))
+			</if>
+			<if test="versionType!=null and versionType!=''">
+				and av.version_type=#{versionType}
+			</if>
+			<if test="app!=null and app!=''">
+				and (ap.app_id like CONCAT('%',#{app},'%') or ap.app_name like CONCAT('%',#{app},'%'))
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(av.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(av.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="instruction!=null and instruction!=''">
+				and av.instruction like CONCAT('%',#{instruction},'%')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and av.remark like CONCAT('%',#{remark},'%')
+			</if>
+		order by ap.app_name,av.version_code desc
+	</select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">设备名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="deviceName" placeholder="请输入设备名称" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">设备编号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="deviceId" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+    <div class="layui-inline">
+	    <label class="layui-form-label">固件信息</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="firmwareInfo" placeholder="请输入固件信息" autocomplete="off" class="layui-input">
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">品牌</label>
+	    <div class="layui-input-inline">
+	         <select name="brandId" lay-filter="brandId" lay-search="" lay-verify="required" lay-reqtext="品牌是必选项，岂能为空？" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+	</div>
+	<div class="layui-inline">
+   	 	<label class="layui-form-label">型号</label>
+	    <div class="layui-input-inline">
+	         <select name="modelId" lay-search="" lay-verify="required" lay-reqtext="型号是必选项，岂能为空？" >
+	             <option value=""></option>
+	         </select>
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">有线MAC</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="wiredMac" placeholder="请输入有线MAC地址" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">无线MAC</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="wirelessMac" placeholder="请输入无线MAC地址" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">序列号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="serialNumber" placeholder="请输入序列号" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">蓝牙</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="bluetooth" placeholder="请输入蓝牙信息" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">IMEI号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="imei" placeholder="请输入IMEI号" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+    <div class="layui-inline">
+	    <label class="layui-form-label">IMEI2号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="imei2" placeholder="请输入IMEI2号" autocomplete="off" class="layui-input">
+	    </div>
+    </div>
+  </div>
+  
+  <div id="tableScope" class="layui-form-item">
+  	<div class="layui-inline">
+    	<table id="tableData" lay-filter="tableData"></table>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 500px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+    </div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+	      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+	      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+	      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/select/xm-select.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form;
+	
+	
+	load_brand();
+	init_data();
+	
+	
+	function init_data(){
+		$('input[name="deviceId"]').val(initData.deviceId);
+		$('input[name="deviceName"]').val(initData.deviceName);
+		$('input[name="wiredMac"]').val(initData.wiredMac);
+		$('input[name="wirelessMac"]').val(initData.wirelessMac);
+		$('input[name="imei"]').val(initData.imei);
+		$('input[name="imei2"]').val(initData.imei2);
+		$('input[name="bluetooth"]').val(initData.bluetooth);
+		$('input[name="serialNumber"]').val(initData.serialNumber);
+		$('input[name="firmwareInfo"]').val(initData.firmwareInfo);
+		$('textarea[name="remark"]').val(initData.remark);
+		form.render();
+		showTableData();
+		if(!$.isEmptyObject(initData.deviceId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	function showTableData(){
+		var tb1 = table.render({
+			    elem: '#tableData'
+			   	,method:'post'
+			   	,contentType:'application/json;charset=utf-8'
+			   	,where:{'pageSize':100}
+			   	,url:'app/appSelected'
+		   		,height: 200
+				,width:625
+			    ,cols: [[
+			       {type: 'checkbox'}
+			      ,{field:'appId', title:'产品id',hide:true}
+			      ,{field:'appName', title:'产品名称'}
+			    ]]
+				,response: {
+			      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+			    }
+			    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+			    	if(res.success){
+				      return {
+				        "code": res.code, //解析接口状态
+				        "msg": res.msg, //解析提示文本
+				        "count": res.data.total, //解析数据长度
+				        "data": res.data.list //解析数据列表
+				      };
+			    	}
+			    }
+			    ,done:function(res, page, count){
+			    	$.each(res.data,function(i,rowData){
+			    		rowData.checked = false;
+			    		$.each(initData.deviceApps,function(j,x){
+			    			if(x.appId==rowData.appId){
+			    				//选中行
+			    				rowData.LAY_CHECKED = true;
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').prop('checked', true);
+						        $('tr[data-index=' + rowData.LAY_TABLE_INDEX + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+						        return false;
+			    			}
+			    		});
+			    		
+			    	});
+			    	
+			    }
+		  });
+	}
+	
+	
+	//监听选中事件
+	form.on('select(brandId)', function(){
+		load_model();
+	});
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	var array = new Array();
+    	$.each(table.cache.tableData,function(i,x){
+    		if(x.LAY_CHECKED){
+    			var app = {};
+    			app['appId'] = x.appId;
+    			array.push(app);
+    		}
+    	});
+    	
+    	if(array.length<1){
+    		layer.msg('请选择产品',{icon:5,shift:6});
+	    	return;
+    	}
+    	data.field['deviceApps'] = array;
+        $.ajax({
+			url : 'device/saveDevice',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+	
+	
+	
+	function load_brand(){
+		$.ajax({
+			url : 'brand/brandSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'pageSize':100}),
+			success : function(res) {
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="brandId"] option:first').clone(true);
+						option.val(x.brandId);
+						option.text(x.brandName);
+						$('select[name="brandId"]').append(option);
+					});
+					$('select[name="brandId"]').val(initData.brandId);
+					form.render();
+					load_model();
+				}
+			}
+		});
+	}
+	
+	
+	function load_model(){
+		var brandId = $('select[name="brandId"]').val();
+		$.ajax({
+			url : 'model/brandModelSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'brand':brandId,'pageSize':100}),
+			success : function(res) {
+				$('select[name="modelId"] option:first').nextAll().remove();
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="modelId"] option:first').clone(true);
+						option.val(x.modelId);
+						option.text(x.modelName);
+						$('select[name="modelId"]').append(option);
+					});
+					$('select[name="modelId"]').val(initData.modelId);
+				}
+				form.render();
+			}
+		});
+	}
+	
+	
+	
+}();
+</script>
+</body>
+</html>

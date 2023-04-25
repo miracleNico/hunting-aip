@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.UpgradePlanMapper">
+
+	<insert id="addUpgradePlanScope">
+		INSERT INTO t_upgrade_plan_scope(upgrade_plan_scope_id,upgrade_plan_id,brand_id,model_scope,models)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.upgradePlanScopeId},#{item.upgradePlanId},#{item.brandId},#{item.modelScope},#{item.models})
+		</foreach>
+	</insert>
+
+	<update id="removeUpgradePlan">
+		update t_upgrade_plan set status=false 
+		where upgrade_plan_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.upgradePlanId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getUpgradePlan" resultType="work.metanet.model.UpgradePlan">
+		select * from t_upgrade_plan where status=true
+		<if test="upgradePlanName!=null and upgradePlanName!=''">
+			and upgrade_plan_name=#{upgradePlanName}
+		</if>
+		<if test="upgradePlanId!=null and upgradePlanId!=''">
+			and upgrade_plan_id=#{upgradePlanId}
+		</if>
+	</select>
+	
+	<select id="upgradePlanInfo" resultType="work.metanet.api.upgradePlan.protocol.ReqUpgradePlanInfo$RespUpgradePlanInfo">
+		select
+			DATE_FORMAT(bd.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(bd.upgrade_time,'%Y-%m-%d %H:%i:%s') upgrade_time,
+			ap.app_name,
+			stav.version_code startVersionCode,
+			enav.version_code endVersionCode,
+			toav.version_code toVersionCode,
+			bd.*
+		from t_upgrade_plan bd
+			LEFT JOIN t_app ap on ap.app_id=bd.app_id
+			LEFT JOIN t_app_version stav on stav.status=true and stav.version_id=bd.start_version_id
+			LEFT JOIN t_app_version enav on enav.status=true and enav.version_id=bd.end_version_id
+			LEFT JOIN t_app_version toav on toav.status=true and toav.version_id=bd.to_version_id
+		where 1=1
+			and bd.`status`=true
+			and bd.upgrade_plan_id=#{upgradePlanId}
+	</select>
+	
+	<select id="upgradePlanList" resultType="work.metanet.api.upgradePlan.protocol.ReqUpgradePlanList$RespUpgradePlanList">
+		select
+			DATE_FORMAT(bd.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+			DATE_FORMAT(bd.update_time,'%Y-%m-%d %H:%i:%s') update_time,
+			DATE_FORMAT(bd.upgrade_time,'%Y-%m-%d %H:%i:%s') upgrade_time,
+			ap.app_name,
+			stav.version_code startVersionCode,
+			enav.version_code endVersionCode,
+			toav.version_code toVersionCode,
+			bd.*
+		from t_upgrade_plan bd
+			LEFT JOIN t_app ap on ap.app_id=bd.app_id
+			LEFT JOIN t_app_version stav on stav.status=true and stav.version_id=bd.start_version_id
+			LEFT JOIN t_app_version enav on enav.status=true and enav.version_id=bd.end_version_id
+			LEFT JOIN t_app_version toav on toav.status=true and toav.version_id=bd.to_version_id
+		where bd.`status`=true
+			<if test="upgradePlan!=null and upgradePlan!=''">
+				and (bd.upgrade_plan_id like CONCAT('%',#{upgradePlan},'%') or bd.upgrade_plan_name  like CONCAT('%',#{upgradePlan},'%'))			
+			</if>
+			<if test="appId!=null and appId!=''">
+				and bd.app_id=#{appId}
+			</if>
+			<if test="toVersionId!=null and toVersionId!=''">
+				and bd.to_version_id=#{toVersionId}
+			</if>
+			<if test="enforce!=null">
+				and bd.enforce=${enforce}
+			</if>
+			<if test="sendStatus!=null">
+				and bd.send_status=${sendStatus}
+			</if>
+			<if test="deviceScope!=null and deviceScope!=''">
+				and bd.device_scope=#{deviceScope}
+			</if>
+			<if test="startUpgradeTime!=null and startUpgradeTime!=''">
+				and DATE_FORMAT(bd.upgrade_time,'%Y%m%d')>=DATE_FORMAT(#{startUpgradeTime},'%Y%m%d')
+			</if>
+			<if test="endUpgradeTime!=null and endUpgradeTime!=''">
+				and DATE_FORMAT(bd.upgrade_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endUpgradeTime},'%Y%m%d')
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(bd.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(bd.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and bd.remark like CONCAT('%',#{remark},'%')
+			</if>
+		order by bd.create_time desc
+	</select>
+	
+	<select id="upgradePlanScopeInfoList" resultType="work.metanet.api.upgradePlan.protocol.ReqUpgradePlanScopeInfo$RespUpgradePlanScopeInfo">
+		select
+			ups.*,
+			bd.brand_name,
+			GROUP_CONCAT(md.model_name) modelNames
+		from t_upgrade_plan_scope ups
+			LEFT JOIN t_brand bd on bd.brand_id=ups.brand_id
+			LEFT JOIN t_model md on md.status=true and FIND_IN_SET(md.model_id,ups.models)
+		where ups.upgrade_plan_id=#{upgradePlanId}
+		GROUP BY ups.upgrade_plan_scope_id
+	</select>
+	
+</mapper>

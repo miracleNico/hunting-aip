@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<a href="business/listPage" style="text-decoration:underline;">返回</a>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px" >
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">内容商</label>
+                    <div class="layui-input-inline">
+                         <select name="businessId" lay-search="">
+				             <option value=""></option>
+				         </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">使用渠道</label>
+                    <div class="layui-input-inline">
+                        <select name="channelId" lay-filter="channelId" lay-search="">
+				             <option value=""></option>
+				         </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">使用产品</label>
+                    <div class="layui-input-inline">
+                         <select name="appId" lay-filter="appId" lay-search="">
+				             <option value=""></option>
+				         </select>
+                    </div>
+                </div>
+            	<div class="layui-inline">
+                    <label class="layui-form-label">使用状态</label>
+                    <div class="layui-input-inline">
+                        <select name="useStatus" lay-search="">
+                            <option value=""></option>
+                            <option value="NO_USE">未使用</option>
+                            <option value="USEING">使用中</option>
+                            <option value="SUCCESS">成功</option>
+                            <option value="FAIL">失败</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">SN码</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="businessSnCode" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+	           <div class="layui-inline">
+	               <label class="layui-form-label">开始时间</label>
+	               <div class="layui-input-inline">
+	                   <input type="text" name="startTime" id="startTime" autocomplete="off" class="layui-input" placeholder="导入时间">
+	               </div>
+	           </div>
+	           <div class="layui-inline">
+	               <label class="layui-form-label">结束时间</label>
+	               <div class="layui-input-inline">
+	                   <input type="text" name="endTime" id="endTime" autocomplete="off" class="layui-input" placeholder="导入时间">
+	               </div>
+	           </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="remark" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+                </div>
+           </div>
+        </form>
+    </div>
+</fieldset>
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+
+
+<script type="text/html" id="tableToolbar">
+  <div class="layui-btn-container">
+	<button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius layui-bg-cyan" lay-event="tableDataRestoreSn" _permission="businessSn:reuse">恢复使用</button>
+    <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius layui-btn-danger" lay-event="tableDataRemove" _permission="businessSn:remove">删除</button>
+	<a class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary" href="template/内容商激活码.xlsx">下载模板</a>
+	<button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius" id="import" _permission="businessSn:import">导入</button>
+  </div>
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+	var businessId = [[${businessId}]];
+</script>
+
+<script type="text/html" id="tableRowBar">
+	<a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius layui-btn-danger data-count-delete" lay-event="tableRowRemove" _permission="businessSn:remove">删除</a>
+</script>
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate,upload = layui.upload;
+	
+	load_business();
+	
+	load_channel();
+	
+	//监听选中事件
+	form.on('select(channelId)', function(){
+		load_app();
+	});
+	
+	//日期
+    laydate.render({
+        elem: '#startTime'
+    });
+    laydate.render({
+        elem: '#endTime'
+    });
+	
+	table.render({
+	    elem: '#tableData'
+	    ,method:'post'
+	    ,contentType:'application/json;charset=utf-8'
+	    ,url:'businessSn/businessSnList'
+	    ,where:{'businessId':businessId}
+		,height: 550
+	    ,cols: [[
+	    	{type: 'checkbox', fixed: 'left'}
+	      ,{type: 'numbers',fixed: 'left',fixed: 'left'}
+	      ,{field:'businessSerialNumberId',hide:true}
+	      ,{field:'businessSnCode', title:'SN码',fixed: 'left',width:130}
+	      ,{field:'callType', title:'调用类型',width:100}
+	      ,{field:'useStatus', title:'使用状态',width:100,templet:function(d){
+	    	  var color = '';
+	    	  switch(d.useStatus) {
+	    	  	 case '使用中':
+	    	    	 color = 'blue';
+	    	        break;
+	    	     case '成功':
+	    	    	 color = '#5FB878';
+	    	        break;
+	    	     case '失败':
+	    	    	 color = '#FF5722';
+	    	        break;
+	    	  }
+	    	  return '<span style="color: '+color+';">'+d.useStatus+'</span>';
+	      }}
+	      ,{field:'channelName', title:'渠道名称',width:120}
+	      ,{field:'appName', title:'产品名称',width:140}
+	      ,{field:'businessName', title:'内容商',width:100}
+	      ,{field:'useNumber', title:'当前使用次数',width:120}
+	      ,{field:'maxUseNumber', title:'最大使用次数',width:120}
+	      ,{field:'remark', title:'备注',width:180}
+	      ,{field:'createTime', title:'导入时间',width:170}
+	      ,{field:'updateTime', title:'修改时间',width:170}
+	      ,{title: '操作', fixed: "right", align: "center", templet: '#tableRowBar'}
+	    ]]
+    	,request: {
+    	    pageName: 'pageNum' //页码的参数名称，默认：page
+    	    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+    	  }
+	    ,response: {
+	      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+	    }
+	    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+	    	if(res.success){
+		      return {
+		        "code": res.code, //解析接口状态
+		        "msg": res.msg, //解析提示文本
+		        "count": res.data.total, //解析数据长度
+		        "data": res.data.list //解析数据列表
+		      };
+	    	}
+	    }
+	    ,page: true
+	    ,toolbar: '#tableToolbar' //开启头部工具栏，并为其绑定左侧模板
+    	,done:function(){
+	    	importRender();
+	    	permission();
+	    }
+	  });
+	
+	function importRender(){
+		upload.render({
+  		    elem: '#import'
+  		    ,url: 'businessSn/importBusinessSn'
+  		    ,accept: 'file' //普通文件
+  		    ,done: function(res){
+  		    	if(res.success){
+  		    		var str = "";
+  		    		str += "总条数:"+res.data.totalCount;
+  		    		str += "<br/>"
+  		    		str += "成功数:"+res.data.successCount;
+  		    		str += "<br/>"
+  		    		str += "失败数:"+res.data.failCount;
+  		    		str += "<br/>";
+  		    		str += "错误信息:";
+  		    		var fails = '';
+  		    		$.each(res.data.fails,function(i,x){
+  		    			fails += "<br>第"+x.row+"行 "+ x.msg;
+  		    		})
+  			    	layer.alert(str+fails);
+  		    		table.reload('tableData');
+  		    	}
+  		    }
+  		});
+	}
+	
+	  //监听搜索操作
+      form.on('submit(data-search-btn)', function (data) {
+          //执行搜索重载
+          table.reload('tableData', {
+              page: {curr: 1}
+              , where: data.field
+          }, 'data');
+      });
+	  
+	  
+      //头工具栏事件
+      table.on('toolbar(tableData)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var data = checkStatus.data;
+        switch(obj.event){
+          case 'tableDataRemove':
+        	  removeTableRow(data);
+          break;
+          case 'tableDataRestoreSn':
+        	  tableDataRestoreSn(data);
+          break;
+        };
+      });
+      
+      //监听表格行操作事件
+      table.on('tool(tableData)', function (obj) {
+          var data = obj.data;
+          switch(obj.event){
+	          case 'tableRowRemove':
+	        	  removeTableRow(new Array(data));
+	          break;
+	      };
+      });
+      
+      function tableDataRestoreSn(data){
+    	  if(data.length<1){
+    		  layer.msg('请选择您要操作的数据');
+    		  return;
+    	  }
+    	  layer.confirm('确定要恢复使用吗?',function(){
+	    	  $.ajax({
+	    			url : 'businessSn/restoreSn',
+	    			type : 'POST',
+	    			contentType : 'application/json;charset=utf-8',
+	    			dataType : 'json',
+	    			data:JSON.stringify(data),
+	    			success : function(res) {
+	    				if(res.success){
+		    				layer.msg(res.msg,table.reload('tableData'));	    					
+	    				}
+	    			}
+	    		});
+    	  });
+      }
+      
+      
+      function removeTableRow(data){
+    	  if(data.length<1){
+    		  layer.msg('请选择您要删除的数据');
+    		  return;
+    	  }
+    	  layer.prompt({title: '输入口令，并确认', formType: 2}, function(pass, index){
+    		  if(pass!=confirmPwd()) {
+    			  return layer.msg('口令不正确');
+    		  }layer.close(index);
+	    	  layer.confirm('确定要删除吗?',function(){
+		    	  $.ajax({
+		    			url : 'businessSn/removeBusinessSn',
+		    			type : 'POST',
+		    			contentType : 'application/json;charset=utf-8',
+		    			dataType : 'json',
+		    			data:JSON.stringify(data),
+		    			success : function(res) {
+		    				if(res.success){
+			    				layer.msg(res.msg,table.reload('tableData'));	    					
+		    				}
+		    			}
+		    		});
+	    	  });
+    	  });
+      }
+      
+      
+      function load_business(){
+  		$.ajax({
+  			url : 'business/businessList',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'pageSize':100}),
+  			success : function(res) {
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="businessId"] option:first').clone(true);
+  						option.val(x.businessId);
+  						option.text(x.businessName);
+  						$('select[name="businessId"]').append(option);
+  					});
+  					$('select[name="businessId"]').val(businessId);
+  					form.render();
+  				}
+  			}
+  		});
+  	  }
+      
+      function load_channel(){
+  		$.ajax({
+  			url : 'channel/channelSelected',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'pageSize':100}),
+  			success : function(res) {
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="channelId"] option:first').clone(true);
+  						option.val(x.channelId);
+  						option.text(x.channelName);
+  						$('select[name="channelId"]').append(option);
+  					});
+  					form.render();
+  					load_app();
+  				}
+  			}
+  		});
+  	}
+      
+      function load_app(){
+  		var channelId = $('select[name="channelId"]').val();
+  		$.ajax({
+  			url : 'app/channelAppSelected',
+  			type : 'POST',
+  			contentType : 'application/json;charset=utf-8',
+  			dataType : 'json',
+  			data:JSON.stringify({'channelId':channelId,'pageSize':100}),
+  			success : function(res) {
+  				$('select[name="appId"] option:first').nextAll().remove();
+  				if(res.success){
+  					$.each(res.data.list,function(i,x){
+  						var option = $('select[name="appId"] option:first').clone(true);
+  						option.val(x.appId);
+  						option.text(x.appName);
+  						$('select[name="appId"]').append(option);
+  					});
+  					form.render();
+  				}
+  			}
+  		});
+  	}
+      
+	
+}();
+</script>
+</body>
+</html>

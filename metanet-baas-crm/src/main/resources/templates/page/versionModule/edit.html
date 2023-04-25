@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+    
+    <link rel="stylesheet" href="lib/zTree_v3/css/demo.css" type="text/css">
+    <link rel="stylesheet" href="lib/zTree_v3/css/metroStyle/metroStyle.css" type="text/css">
+    <style type="text/css">
+    	a{text-decoration:inherit;}
+	</style>
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+   
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">模块名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="moduleName" placeholder="请输入模块名称" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="模块名称是必填项">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+	    <label class="layui-form-label">调用类型</label>
+	    <div class="layui-input-inline">
+	         <select name="callType" lay-search="" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="调用类型是必选项">
+	             <option value=""></option>
+	             <option value="APK">APK</option>
+	             <option value="SDK">SDK</option>
+	             <option value="MP4">MP4</option>
+	         </select>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">模块图标</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="moduleIcon" autocomplete="off" class="layui-input layui-disabled" disabled="disabled">
+	    </div>
+  	</div>
+  	<div class="layui-inline layui-upload">
+ 		<a class="layui-btn layui-btn-radius" id="upload"><i class="layui-icon"></i>上传</a>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">调用包名</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="packageName" placeholder="请输入包名" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">调用类名</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="className" placeholder="请输入类名" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">调用参数</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="parameter" class="layui-textarea" placeholder='{"game":"cf"}' lay-verify="required" lay-reqtext="调用参数格式错误">{}</textarea>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">序号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="sort" placeholder="请输入序号" autocomplete="off" class="layui-input">
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">调用文件</label>
+	    <div class="layui-input-inline">
+	     	<ul id="treeDemo" class="ztree" style="width:505px;height:180px;margin-top: 0px"></ul>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/zTree_v3/js/jquery-1.4.4.min.js" charset="utf-8"></script>
+<script src="lib/zTree_v3/js/jquery.ztree.all.min.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,upload = layui.upload;
+	
+	init_data();
+	
+	function init_data(){
+		$('input[name="moduleName"]').val(initData.moduleName);
+		$('select[name="callType"]').val(initData.callType);
+		$('input[name="moduleIcon"]').val(initData.moduleIcon);
+		$('input[name="packageName"]').val(initData.packageName);
+		$('input[name="className"]').val(initData.className);
+		$('input[name="sort"]').val(initData.sort);
+		$('textarea[name="remark"]').val(initData.remark);
+		if(!$.isEmptyObject(initData.parameter)){
+			$('textarea[name="parameter"]').val(initData.parameter);
+		}
+		form.render();
+		if(!$.isEmptyObject(initData.versionModuleId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	upload.render({
+	    elem: '#upload'
+	    ,url: 'api/file/uploadFile'
+	    ,accept: 'file' //普通文件
+	    ,done: function(res){
+	    	if(res.success){
+				$('input[name="moduleIcon"]').val(res.data);
+	    	}
+	    }
+	});
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	var array = new Array();
+    	$.each(zTree.getCheckedNodes(true),function(i,o){
+    		array.push(o.id);
+    	});
+    	data.field['businessAppIds'] = array.join(',');
+    	data.field['versionModuleId'] = initData.versionModuleId;
+    	data.field['versionId'] = initData.versionId;
+    	data.field['parentId'] = initData.parentId;
+        $.ajax({
+			url : 'appVersionModule/saveAppVersionModule',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.resetTree());
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+
+}();
+
+
+
+
+
+
+
+
+
+var setting = {
+	async: {
+		enable: true,
+		contentType:'application/json;charset=utf-8',
+		dataType:'json',
+		url:"businessApp/businessAppTree",
+		otherParam:{},
+		dataFilter:dataFilter
+	},
+	check: {
+		enable: true,
+		chkDisabledInherit:false
+	},
+	data: {
+		key:{
+			name:"name"
+		},
+		simpleData: {
+			enable: true,
+			idKey: "id",
+			pIdKey: "pId"
+		}
+	},
+	callback: {
+		onAsyncSuccess:onAsyncSuccess,
+		onCheck:onCheck
+	}
+};
+
+function onCheck(event, treeId, treeNode){
+	var packageName = $('input[name="packageName"]').val();
+	if(treeNode.checked && $.isEmptyObject(packageName)){
+		$('input[name="packageName"]').val(treeNode.packageName);
+	}
+}
+
+function onAsyncSuccess(){
+	zTree.expandAll(true);
+	if(!$.isEmptyObject(initData.businessAppIds)){
+		var businessAppIds = initData.businessAppIds.split(',');
+		$.each(businessAppIds,function(i,o){
+			var treeNode = zTree.getNodesByParam("id", o, null)[0];
+			zTree.checkNode(treeNode, true, false);
+		})
+	}
+}
+
+function dataFilter(treeId, parentNode, responseData){
+	if(responseData.success){
+		return responseData.data;
+	}else{
+		return null;
+	}
+}
+
+var zTree;
+$(document).ready(function(){
+	zTree = $.fn.zTree.init($("#treeDemo"), setting);
+});
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.PermissionMapper">
+	
+	<select id="permissionTree" resultType="map">
+		select
+		p.permission_id id,
+		p.permission_name name,
+		p.parent_id pId,
+		!ISNULL(rp.role_permission_id) checked
+		from t_auth_permission p
+		left join t_auth_role_permission rp on rp.permission_id=p.permission_id and role_id=#{roleId}
+		where p.status=true
+		ORDER BY p.sort asc
+	</select>
+
+	<select id="permissionOnly" resultType="work.metanet.model.Permission">
+		select
+		permission_id,
+		permission_name
+		from t_auth_permission
+		where 1=1
+		and `status`=true
+		<if test="permissionName!=null and permissionName!=''">
+			and permission_name=#{permissionName}
+		</if>
+	</select>
+	
+	<select id="permissionInfo" resultType="work.metanet.api.permission.protocol.ReqPermissionInfo$RespPermissionInfo">
+		select
+		permission_id,
+		permission_name,
+		permission_type,
+		permission_tag,
+		parent_id,
+		apis,
+		sort,
+		icon,
+		remark
+		from t_auth_permission
+		where 1=1
+		and `status`=true
+		and permission_id=#{permissionId}
+	</select>
+	
+	<select id="permissionList" resultType="work.metanet.api.permission.protocol.ReqPermissionList$RespPermissionList">
+		select
+		true `open`,
+		permission_id,
+		permission_name,
+		permission_type,
+		permission_tag,
+		parent_id,
+		apis,
+		sort,
+		icon,
+		remark,
+		DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		DATE_FORMAT(update_time,'%Y-%m-%d %H:%i:%s') update_time
+		from t_auth_permission
+		where 1=1
+		and `status`=true
+		<if test="permissionName!=null and permissionName!=''">
+			and permission_name like CONCAT('%',#{permissionName},'%')
+		</if>
+		<if test="permissionType!=null and permissionType!=''">
+			and permission_type=#{permissionType}
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			and DATE_FORMAT(create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			and DATE_FORMAT(create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+		</if>
+		<if test="remark!=null and remark!=''">
+			and remark like CONCAT('%',#{remark},'%')
+		</if>
+		ORDER BY sort asc
+	</select>
+	
+	<update id="removePermission">
+		update t_auth_permission set status=false 
+		where permission_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.permissionId}
+		</foreach>
+		)
+	</update>
+	
+	
+	<select id="adminPermissionApis" resultType="string">
+		<choose>
+			<when test='adminId=="0"'>
+				SELECT GROUP_CONCAT(DISTINCT p.apis) from t_auth_permission p where p.`status`=true and length(apis)>0
+			</when>
+			<otherwise>
+				SELECT GROUP_CONCAT(DISTINCT p.apis)
+				FROM t_auth_admin_role ar
+				join t_auth_role_permission rp on rp.role_id=ar.role_id
+				join t_auth_role r on r.status=true and r.role_id=ar.role_id
+				join t_auth_permission p on p.`status`=true and p.permission_id=rp.permission_id
+				where 1=1
+				and length(apis)>0
+				and ar.admin_id=#{adminId}
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="adminPermissionTags" resultType="string">
+		<choose>
+			<when test='adminId=="0"'>
+				SELECT GROUP_CONCAT(DISTINCT p.permission_tag) from t_auth_permission p where p.`status`=true and length(p.apis)>0
+			</when>
+			<otherwise>
+				SELECT GROUP_CONCAT(DISTINCT p.permission_tag)
+				FROM t_auth_admin_role ar
+				join t_auth_role_permission rp on rp.role_id=ar.role_id
+				join t_auth_role r on r.status=true and r.role_id=ar.role_id
+				join t_auth_permission p on p.`status`=true and p.permission_id=rp.permission_id
+				where 1=1
+				and length(p.apis)>0
+				and ar.admin_id=#{adminId}			
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="adminMenuList" resultType="work.metanet.api.permission.vo.MenuVo">
+		<choose>
+			<when test='adminId=="0"'>
+				SELECT
+				p.permission_id id,p.permission_name title,left(p.apis, LOCATE(',',p.apis)-1) href,p.icon,p.parent_id
+				FROM t_auth_permission p
+				where 1=1
+				and p.`status`=true 
+				and p.permission_type in ('MODULE','MENU') 
+				ORDER BY p.sort asc
+			</when>
+			<otherwise>
+				SELECT
+				p.permission_id id,p.permission_name title,left(p.apis, LOCATE(',',p.apis)-1) href,p.icon,p.parent_id
+				FROM t_auth_admin_role ar
+				join t_auth_role_permission rp on rp.role_id=ar.role_id
+				join t_auth_role r on r.status=true and r.role_id=ar.role_id 
+				join t_auth_permission p on p.`status`=true and p.permission_id=rp.permission_id
+				where 1=1
+				and ar.admin_id=#{adminId}
+				and p.permission_type in ('MODULE','MENU')
+				GROUP BY p.permission_id
+				ORDER BY p.sort asc
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+</mapper>

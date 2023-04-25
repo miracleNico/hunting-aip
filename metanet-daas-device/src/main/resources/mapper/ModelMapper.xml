@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.ModelMapper">
+
+	<update id="removeModel">
+		update t_model set status=false
+		where model_id in (
+		<foreach collection="list" item="item" separator=",">
+			#{item.modelId}
+		</foreach>
+		)
+	</update>
+	
+	<select id="getModel" resultType="work.metanet.model.Model">
+		select * from t_model where status=true 
+		<if test="modelName!=null and modelName!=''">
+			and model_name=#{modelName} 		
+		</if>
+		<if test="brandId!=null and brandId!=''">
+			and brand_id=#{brandId}
+		</if>
+	</select>
+	
+	<select id="modelInfo" resultType="work.metanet.api.model.protocol.ReqModelInfo$RespModelInfo">
+		select
+			md.model_id,
+			md.model_name,
+			bd.brand_id,
+			bd.brand_name,
+			md.remark,
+			md.source,
+			DATE_FORMAT(md.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_model md
+			left join t_brand bd on bd.brand_id=md.brand_id
+		where md.`status`=true and md.model_id=#{modelId}
+	</select>
+	
+	<select id="modelList" resultType="work.metanet.api.model.protocol.ReqModelList$RespModelList">
+		select
+			md.model_id,
+			md.model_name,
+			bd.brand_id,
+			bd.brand_name,
+			md.remark,
+			md.source,
+			DATE_FORMAT(md.create_time,'%Y-%m-%d %H:%i:%s') create_time
+		from t_model md
+			left join t_brand bd on bd.brand_id=md.brand_id
+		where md.`status`=true
+			<if test="model!=null and model!=''">
+				and (md.model_id like CONCAT('%',#{model},'%') or md.model_name  like CONCAT('%',#{model},'%'))			
+			</if>
+			<if test="brand!=null and brand!=''">
+				and (bd.brand_id like CONCAT('%',#{brand},'%') or bd.brand_name  like CONCAT('%',#{brand},'%'))			
+			</if>
+			<if test="source!=null and source!=''">
+				and md.source=#{source}
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				and DATE_FORMAT(md.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				and DATE_FORMAT(md.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+			</if>
+			<if test="remark!=null and remark!=''">
+				and md.remark like CONCAT('%',#{remark},'%')			
+			</if>
+		order by md.model_id desc
+	</select>
+	
+	
+	
+</mapper>

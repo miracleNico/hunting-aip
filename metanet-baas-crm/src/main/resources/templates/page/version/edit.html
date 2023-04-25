@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+   
+   <div class="layui-form-item">
+	   	<div class="layui-inline">
+           <label class="layui-form-label">渠道</label>
+           <div class="layui-input-inline">
+               <select name="channelId" lay-filter="channelId" lay-search="" placeholder="按渠道筛选">
+			        <option value=""></option>
+			    </select>
+           </div>
+       </div>
+   </div>
+   
+   <div class="layui-form-item">
+   		<div class="layui-inline">
+		    <label class="layui-form-label">产品</label>
+		    <div class="layui-input-inline">
+		         <select name="appId" lay-filter="appId" lay-search="" lay-verify="required" lay-reqtext="产品是必选项，岂能为空？" >
+		             <option value=""></option>
+		         </select>
+		    </div>
+		</div>
+		<div class="layui-inline">
+		    <label class="layui-form-label">版本类型</label>
+		    <div class="layui-input-inline">
+		         <select name="versionType" lay-search="" lay-verify="required" lay-reqtext="版本类型是必选项，岂能为空？" >
+		             <option value=""></option>
+		             <option value="0">全量包</option>
+		             <option value="1">拆分包</option>
+		         </select>
+		    </div>
+		</div>
+   </div> 
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">版本号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="versionCode" placeholder="请输入版本号" autocomplete="off" class="layui-input" lay-verify="required" lay-reqtext="版本号是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">版本名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="versionName" autocomplete="off" class="layui-input" placeholder="请输入版本名称" lay-verify="required" lay-reqtext="版本名称是必填项，岂能为空？">
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">文件地址</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="url" autocomplete="off" class="layui-input" placeholder="上传文件或外部链接" lay-verify="required" lay-reqtext="文件地址是必填项，岂能为空？">
+	    </div>
+  	</div>
+  	<div class="layui-inline layui-upload">
+ 		<a class="layui-btn layui-btn-radius" id="upload"><i class="layui-icon"></i>上传</a>
+ 		<!-- 
+ 		<div style="height: 20px;"></div>
+		<div class="layui-progress layui-progress-big" lay-showPercent="yes" lay-filter="progressBar">
+			<div class="layui-progress-bar layui-bg-red" lay-percent="0%"></div>
+		</div> -->
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">MD5</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="md5" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">文件大小(b)</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="fileSize" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">说明</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="instruction" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea"></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <a class="layui-btn layui-btn-radius" lay-submit lay-filter="formSubmit">确认保存</a>
+      <a class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</a>
+      <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,upload = layui.upload,element = layui.element;
+	element.init();
+	
+	load_channel();
+	
+	//监听选中事件
+	form.on('select(channelId)', function(){
+		load_app();
+	});
+	
+	init_data();
+	
+	function init_data(){
+		$('input[name="versionCode"]').val(initData.versionCode);
+		$('input[name="versionName"]').val(initData.versionName);
+		$('input[name="md5"]').val(initData.md5);
+		$('input[name="fileSize"]').val(initData.fileSize);
+		$('input[name="url"]').val(initData.url);
+		$('textarea[name="instruction"]').val(initData.instruction);
+		$('textarea[name="remark"]').val(initData.remark);
+		if($.isEmptyObject(initData.versionType)){
+			$('select[name="versionType"] option:eq(1)').attr('selected','selected');
+		}else{
+			$('select[name="versionType"]').val(initData.versionType);
+		}
+		form.render();
+		if(!$.isEmptyObject(initData.versionId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+	var uploadInde;
+	upload.render({
+	    elem: '#upload'
+	    ,url: 'api/file/uploadApp'
+	    ,accept: 'file' //普通文件
+	    ,exts: 'apk'
+	    /**
+    	,progress: function(e , percent) {
+    		//alert(JSON.stringify(e));
+			console.log("进度：" + e + '%');
+			element.progress('progressBar',e  + '%');
+		}*/
+		,progress: function(e , percent) {
+			uploadInde = layer.load(2, {shade: [0.5,'#fff']});
+		}
+	    ,done: function(res){
+	    	layer.close(uploadInde);
+	    	if(res.success){
+		    	$('input[name="md5"]').val(res.data.md5);
+				$('input[name="fileSize"]').val(res.data.fileSize);
+				$('input[name="url"]').val(res.data.url);
+		    	layer.alert('上传成功');
+	    	}else{
+	    		layer.alert(res.msg);
+	    	}
+	    }
+	});
+	
+	//监听提交
+    form.on('submit(formSubmit)', function (data) {
+    	data.field['versionId'] = initData.versionId;
+        $.ajax({
+			url : 'version/saveAppVersion',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify(data.field),
+			success : function(res) {
+				if(res.success){
+					parent.layer.msg(res.msg,parent.layui.table.reload('tableData'));
+					parent.layer.close(parent.layer.getFrameIndex(window.name));
+				}
+			}
+		});
+    });
+	
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    });
+    
+    function load_channel(){
+		$.ajax({
+			url : 'channel/channelSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'pageSize':100}),
+			success : function(res) {
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="channelId"] option:first').clone(true);
+						option.val(x.channelId);
+						option.text(x.channelName);
+						$('select[name="channelId"]').append(option);
+					});
+					$('select[name="channelId"]').val(initData.channelId);
+					form.render();
+					load_app();
+				}
+			}
+		});
+	}
+    
+    
+    function load_app(){
+    	var channelId = $('select[name="channelId"]').val();
+		$.ajax({
+			url : 'app/appSelected',
+			type : 'POST',
+			contentType : 'application/json;charset=utf-8',
+			dataType : 'json',
+			data:JSON.stringify({'channelId':channelId,'pageSize':100}),
+			success : function(res) {
+				$('select[name="appId"] option:first').nextAll().remove();
+				if(res.success){
+					$.each(res.data.list,function(i,x){
+						var option = $('select[name="appId"] option:first').clone(true);
+						option.val(x.appId);
+						option.text(x.appName);
+						$('select[name="appId"]').append(option);
+					});
+					$('select[name="appId"]').val(initData.appId);
+					form.render();
+				}
+			}
+		});
+	}
+	
+	
+}();
+</script>
+</body>
+</html>

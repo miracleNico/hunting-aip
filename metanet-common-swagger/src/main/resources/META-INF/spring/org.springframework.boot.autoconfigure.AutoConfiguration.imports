@@ -1,0 +1,3 @@
+work.metanet.common.swagger.config.SwaggerAutoConfiguration
+work.metanet.common.swagger.config.SwaggerWebConfiguration
+work.metanet.common.swagger.config.SwaggerBeanPostProcessor

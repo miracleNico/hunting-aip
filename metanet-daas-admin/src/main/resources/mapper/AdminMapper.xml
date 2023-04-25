@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.AdminMapper">
+
+	<select id="adminOnly" resultType="work.metanet.model.Admin">
+		select
+		admin_id,
+		username
+		from t_admin
+		where 1=1
+		and `status`=true
+		<if test="username!=null and username!=''">
+			and username=#{username}
+		</if>
+	</select>
+	
+	<select id="adminInfo" resultType="work.metanet.api.admin.protocol.ReqAdminInfo$RespAdminInfo">
+		select admin_id, username, enable_status, remark
+		from t_admin
+		where 1=1
+		and `status`=true
+		and admin_id=#{adminId}
+	</select>
+	
+	<select id="adminList" resultType="work.metanet.api.admin.protocol.ReqAdminList$RespAdminList">
+		select
+		a.admin_id,
+		a.username,
+		a.enable_status,
+		a.remark,
+		GROUP_CONCAT(r.role_name order by r.update_time) roleNames,
+		DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		DATE_FORMAT(a.update_time,'%Y-%m-%d %H:%i:%s') update_time
+		from t_admin a
+		left join t_auth_admin_role ar on ar.admin_id=a.admin_id
+		left join t_auth_role r on r.`status`=true and r.role_id=ar.role_id
+		where 1=1
+		and a.admin_id!='0'
+		and a.`status`=true
+		<if test="username!=null and username!=''">
+			and a.username like CONCAT('%',#{username},'%')
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			and DATE_FORMAT(a.create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			and DATE_FORMAT(a.create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+		</if>
+		<if test="remark!=null and remark!=''">
+			and a.remark like CONCAT('%',#{remark},'%')
+		</if>
+		GROUP BY a.admin_id
+		ORDER BY a.update_time desc
+	</select>
+	
+	<update id="removeAdmin">
+		update t_admin set status=false 
+		where admin_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.adminId}
+		</foreach>
+		)
+	</update>
+	
+</mapper>

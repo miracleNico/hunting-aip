@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionExerciseMapper">
+
+    <resultMap id="respExerciseInfo" type="work.metanet.api.vision.protocol.ReqVisionExerciseInfo$RespVisionExerciseInfo">
+        <result column="user_id" property="userId"/>
+        <result column="eye_id" property="eyeId"/>
+        <result column="date_time" property="dateTime"/>
+        <result column="exercise_type" property="exerciseType"/>
+        <result column="time_duration" property="timeDuration"/>
+        <result column="exercise_mode" property="exerciseMode"/>
+        <result column="exercise_id" property="exerciseId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="article_exercise_id" property="articleExerciseId"/>
+        <collection property="eyesArticle" ofType="work.metanet.model.VisionContentBase">
+            <result property="eyesArticleId" column="eyes_article_id"/>
+            <result property="eyesArticleTitle" column="eyes_article_title"/>
+            <result property="eyesArticleType" column="eyes_article_type"/>
+            <result property="eyesArticleImg" column="eyes_article_img"/>
+            <result property="eyesArticleUrl" column="eyes_article_url"/>
+            <result property="releaseTime" column="release_time"/>
+            <result property="releaseNumber" column="release_number"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+            <result property="status" column="status"/>
+            <result property="remark" column="remark"/>
+        </collection>
+    </resultMap>
+
+    <select id="getVisionExerciseList" parameterType="work.metanet.api.vision.protocol.ReqVisionExerciseList"
+            resultType="work.metanet.api.vision.protocol.ReqVisionExerciseList$RespVisionExerciseList">
+        select
+        user_id,
+        date_time,
+        exercise_type,
+        time_duration,
+        content_id,
+        exercise_id,
+        create_time,
+        update_time,
+        remark
+        from `t_vision_exercise`
+        <where>
+            status = 1
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="exerciseType != null and exerciseType != -1">
+                and exercise_type = #{exerciseType}
+            </if>
+            <if test="contentId != null and contentId != ''">
+                and content_id = #{contentId}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getVisionExerciseListGroupByTypeOrderByTime"
+            parameterType="work.metanet.api.vision.protocol.ReqVisionExerciseList"
+            resultType="work.metanet.api.vision.protocol.ReqVisionExerciseList$RespVisionExerciseList">
+        <include refid="init_exercise_of_week"/>
+        select a.user_id, a.create_time, a.exercise_type, b.create_time bct, b.sumDuration, b.user_id bui
+        from exercise_number as a
+        left join
+        (select sum(time_duration) as sumDuration ,user_id,exercise_type,create_time
+        from t_vision_exercise
+        where user_id = #{userId}
+        group by date (create_time), exercise_type
+        order by date (create_time) desc) as b
+        on a.user_id = b.user_id and date (a.create_time) = date (b.create_time) and a.user_id = b.user_id and
+        a.exercise_type = b.exercise_type
+        group by a.exercise_type, a.create_time
+        order by date (a.create_time);
+    </select>
+
+    <select id="getVisionExerciseInfo" parameterType="work.metanet.api.vision.protocol.ReqVisionExerciseInfo"
+            resultType="work.metanet.api.vision.protocol.ReqVisionExerciseInfo$RespVisionExerciseInfo">
+        select
+        user_id,
+        date_time,
+        exercise_type,
+        time_duration,
+        content_id,
+        exercise_id,
+        create_time,
+        update_time,
+        remark
+        from `t_vision_exercise`
+        <where>
+            status = 1
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="exerciseId != null and exerciseId != ''">
+                and exercise_id = #{exerciseId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateVisionExercise" parameterType="work.metanet.api.vision.protocol.ReqSaveVisionExercise">
+        update `t_vision_exercise`
+        <set>
+            <if test="dateTime != null">
+                date_time = #{dateTime},
+            </if>
+            <if test="exerciseType != null and exerciseType != -1">
+                exercise_type = #{exerciseType},
+            </if>
+            <if test="timeDuration != null and timeDuration>=0">
+                time_duration = #{timeDuration},
+            </if>
+            <if test="contentId != null and contentId != ''">
+                content_id = #{contentId},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+        </set>
+        <where>
+            <if test="exerciseId != null and exerciseId != ''">
+                and exercise_id = #{exerciseId}
+            </if>
+        </where>
+    </update>
+    <insert id="insertVisionExercise" parameterType="work.metanet.api.vision.protocol.ReqSaveVisionExercise">
+        insert into `t_vision_exercise`
+        (user_id,
+         date_time,
+         exercise_type,
+         time_duration,
+         content_id,
+         exercise_id,
+         remark)
+        values (#{userId},
+                #{dateTime},
+                #{exerciseType},
+                #{timeDuration},
+                #{contentId},
+                #{exerciseId},
+                #{remark})
+    </insert>
+    <update id="removeVisionExercise" parameterType="work.metanet.api.vision.protocol.ReqRemoveVisionExercise">
+        update `t_vision_exercise`
+        set status = 0
+        where exercise_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.exerciseId}
+        </foreach>
+    </update>
+
+    <select id="getExerciseCount" parameterType="work.metanet.api.vision.protocol.ReqVisionExerciseList"
+            resultType="work.metanet.api.vision.protocol.ReqVisionExerciseList$RespVisionExerciseList">
+        <include refid="init_exercise_count"/>
+        select en.*, tve.exercise_count
+        from exercise_number as en
+        left join (select *, count(1) as exercise_count
+        from t_vision_exercise
+        where status = 1
+        <![CDATA[
+                              and date_sub(curdate(), INTERVAL 7 DAY) <= date (`create_time`) and user_id = #{userId}
+                            ]]>
+        group by date_format(create_time, '%Y-%m-%d'))
+        as tve
+        on en.user_id = tve.user_id and date (en.create_time) = date (tve.create_time)
+        group by en.create_time;
+
+    </select>
+
+    <sql id="init_exercise_count">
+        drop table if exists exercise_number;
+        create
+        temporary table exercise_number (
+            user_id varchar(64) not null ,
+            create_time timestamp not null default current_timestamp
+        );
+        insert into exercise_number (user_id, CREATE_TIME)
+        values (#{userId}, date_sub(curdate(), INTERVAL 0 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY));
+    </sql>
+    <sql id="init_exercise_of_week">
+        drop table if exists exercise_number;
+        create
+        temporary table exercise_number (
+            user_id varchar(64) not null ,
+            create_time timestamp not null default current_timestamp,
+            exercise_type int not null
+        );
+        insert into exercise_number (user_id, CREATE_TIME, exercise_type)
+        values (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 0),
+               (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 1),
+               (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 2),
+               (#{userId}, date_sub(curdate(), INTERVAL 0 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY), 3),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY), 3);
+    </sql>
+
+</mapper>

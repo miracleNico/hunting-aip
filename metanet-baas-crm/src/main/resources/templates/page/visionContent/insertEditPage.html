@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/lib/layui/css/layui.css"/>
+    <script src="/lib/layui/layui.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+    <textarea id="edit" style="display: none;"></textarea>
+<script type="text/javascript">
+    layui.use(['layedit', 'layer', 'jquery'], function () {
+        var $ = layui.jquery;
+        var layedit = layui.layedit;
+        layedit.set({
+            uploadImage: {
+                url: '/api/eyesArticle/uploadImg',
+                field: 'file',//上传时的文件参数字段名
+                accept: 'image',
+                acceptMime: 'image/*',
+                exts: 'jpg|png|gif|bmp|jpeg',
+                size: 1024 * 5
+            }
+            , uploadVideo: {
+                url: '/api/eyesArticle/uploadVideo',
+                field: 'file',//上传时的文件参数字段名
+                accept: 'video',
+                acceptMime: 'video/*',
+                exts: 'mp4|flv|avi|rm|rmvb',
+                size: 1024 * 5 * 10
+            }
+            , uploadFiles: {
+                url: '/api/eyesArticle/uploadAudio',
+                accept: 'file',
+                acceptMime: 'file/*',
+                size: '20480',
+                done: function (data) {
+                    console.log(data);
+                }
+            }
+            , calldel: {
+                url: '/api/eyesArticle/deleteFile',
+                done: function (data) {//data删除文件接口返回返回的数据
+                    layer.msg(data.msg)
+                }
+            }
+            , height: 600
+            , autoSync: true
+            //开发者模式 --默认为false
+            , devmode: true
+            //插入代码设置
+            , codeConfig: {
+                hide: false,  //是否显示编码语言选择框
+                default: 'javascript' //hide为true时的默认语言格式
+            }
+            , tool: [
+                 'code', 'strong', 'italic', 'underline', 'del',
+                , 'addhr' //添加水平线
+                , '|', 'fontFomatt', 'fontfamily', 'fontSize', //段落格式，字体样式，字体颜色
+                , 'colorpicker', 'fontBackColor'//字体颜色，字体背景色
+                , 'face', '|', 'left', 'center', 'right', '|', 'link', 'unlink'
+                // , 'image'//原版上传图片
+                , 'images'//多图上传
+                , 'image_alt'//上传图片拓展
+                , 'attachment'//上传附件
+                , 'video' //视频上传
+                , 'anchors' //锚点
+                , '|', 'table'//插入表格
+                , 'customlink'//插入自定义链接
+                , 'fullScreen'//全屏
+                , 'preview'//预览
+            ]
+            ,onchange: function (content) {
+                layedit.sync(ieditor);
+            }
+        })
+        ;
+
+        var ieditor = layedit.build('edit');
+        layedit.sync(ieditor);
+        var articleId = $('#articleId', parent.document).val();
+
+        $.ajax({
+            url: '/api/eyesArticle/eyesArticleInfo',
+            type: 'POST',
+            contentType: 'application/json;charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({"eyesArticleId": articleId}),
+            success: function (res) {
+                layedit.setContent(ieditor, res.data.eyesArticleContent, true);
+                layedit.sync(ieditor)
+            }
+        });
+        /*if (articleId == '' || articleId == null || articleId === '') {
+
+        } else {
+
+        }*/
+
+    })
+</script>
+</body>
+</html>

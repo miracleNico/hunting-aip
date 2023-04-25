@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.StatisticalAppActiveMapper">
+
+	<select id="appActiveUserNumber" resultType="work.metanet.server.vo.StatisticalVo">
+		select
+		CONCAT_WS(' ',a.date,a.app_id) id,number
+		from t_statistical_app_active a
+		join t_app ap on ap.`status`=true and ap.app_id=a.app_id
+		where 1=1
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+		and a.date>=DATE_FORMAT(DATE_ADD(NOW(),INTERVAL -6 DAY),'%Y-%m-%d')
+		and DATE_FORMAT(NOW(),'%Y-%m-%d')>=a.date
+	</select>
+	
+	<select id="yesterdayActiveUserTotal" resultType="int">
+		select SUM(a.number) 
+		from t_statistical_app_active a
+		join t_app ap on ap.`status`=true and ap.app_id=a.app_id
+		<if test="channelId!=null and channelId!=''">
+			and ap.channel_id=#{channelId}
+		</if>
+		where a.date=DATE_FORMAT(DATE_ADD(now(),INTERVAL -1 day),'%Y-%m-%d')
+	</select>
+	
+</mapper>

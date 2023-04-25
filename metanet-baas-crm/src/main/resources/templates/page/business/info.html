@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+
+
+<form class="layui-form layui-form-pane" style="margin-top: 20px;margin-left: 30px">
+    
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">内容商名称</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="businessName" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  	<div class="layui-inline">
+ 		<label class="layui-form-label">内容商编号</label>
+	    <div class="layui-input-inline">
+	      <input type="text" name="businessId" autocomplete="off" class="layui-input layui-disabled" disabled>
+	    </div>
+  	</div>
+  </div>
+  
+  <div class="layui-form-item">
+  	<div class="layui-inline">
+	    <label class="layui-form-label">备注</label>
+	    <div class="layui-input-inline" style="width: 515px;">
+	      <textarea name="remark" class="layui-textarea layui-disabled" disabled></textarea>
+	    </div>
+	</div>
+  </div>
+  
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn layui-btn-radius layui-btn-primary" id="cancel">关闭</button>
+    </div>
+  </div>
+</form>
+
+
+
+
+
+
+<script type="text/javascript" th:inline="javascript">
+	var initData = [[${info}]];
+</script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form;
+
+	init_data();
+	
+	function init_data(){
+		$('input[name="businessId"]').val(initData.businessId);
+		$('input[name="businessName"]').val(initData.businessName);
+		$('textarea[name="remark"]').val(initData.remark);
+		form.render();
+		if(!$.isEmptyObject(initData.businessId)){
+			$('button[type="reset"]').hide();
+		}
+	}
+	
+    //监听关闭
+    $(document).on('click','#cancel',function(){
+    	parent.layer.close(parent.layer.getFrameIndex(window.name));
+    	return false;
+    });
+	
+	
+}();
+</script>
+</body>
+</html>

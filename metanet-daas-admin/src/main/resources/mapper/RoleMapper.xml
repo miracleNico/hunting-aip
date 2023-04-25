@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.server.dao.RoleMapper">
+
+	<select id="roleOnly" resultType="work.metanet.model.Role">
+		select
+		role_id,
+		role_name,
+		role_type
+		from t_auth_role
+		where 1=1
+		and `status`=true
+		<if test="roleName!=null and roleName!=''">
+			and role_name=#{roleName}		
+		</if>
+	</select>
+	
+	<select id="roleInfo" resultType="work.metanet.api.role.protocol.ReqRoleInfo$RespRoleInfo">
+		select
+		role_id,
+		role_name,
+		role_type,
+		remark
+		from t_auth_role
+		where 1=1
+		and `status`=true
+		and role_id=#{roleId}
+	</select>
+	
+	<select id="roleList" resultType="work.metanet.api.role.protocol.ReqRoleList$RespRoleList">
+		select
+		role_id,
+		role_name,
+		role_type,
+		remark,
+		DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		DATE_FORMAT(update_time,'%Y-%m-%d %H:%i:%s') update_time
+		from t_auth_role
+		where 1=1
+		and `status`=true
+		<if test="roleName!=null and roleName!=''">
+			and role_name like CONCAT('%',#{roleName},'%')
+		</if>
+		<if test="roleType!=null and roleType!=''">
+			and role_type = #{roleType}
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			and DATE_FORMAT(create_time,'%Y%m%d')>=DATE_FORMAT(#{startTime},'%Y%m%d')
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			and DATE_FORMAT(create_time,'%Y%m%d')<![CDATA[<=]]>DATE_FORMAT(#{endTime},'%Y%m%d')
+		</if>
+		<if test="remark!=null and remark!=''">
+			and remark like CONCAT('%',#{remark},'%')
+		</if>
+		ORDER BY update_time desc
+	</select>
+	
+	<update id="removeRole">
+		update t_auth_role set status=false 
+		where role_id in
+		(
+		<foreach collection="list" item="item" separator=",">
+			#{item.roleId}
+		</foreach>
+		)
+	</update>
+	
+	<insert id="addRolePermission">
+		insert into t_auth_role_permission(role_permission_id,role_id,permission_id)
+		VALUES
+		<foreach collection="permissionList" item="item" separator=",">
+			(MD5(UUID()),#{roleId},#{item})
+		</foreach>
+	</insert>
+	
+	<insert id="addAdminRole">
+		insert into t_auth_admin_role(admin_role_id,admin_id,role_id)
+		VALUES
+		<foreach collection="roleIdList" item="item" separator=",">
+			(MD5(UUID()),#{adminId},#{item})
+		</foreach>
+	</insert>
+	
+	
+</mapper>

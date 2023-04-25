@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px" >
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+            	<div class="layui-inline">
+                    <label class="layui-form-label">追踪id</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="traceId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+	            <div class="layui-inline">
+	                <label class="layui-form-label">应用</label>
+	                <div class="layui-input-inline">
+	                    <select name="appName" lay-search="">
+	                        <option value=""></option>
+	                        <option value="metanet-baas-app">APP</option>
+	                        <option value="metanet-baas-openapi">OPEN-API</option>
+	                        <option value="metanet-baas-crm">管理后台</option>
+	                        <option value="metanet-baas-channel">渠道后台</option>
+	                    </select>
+	                </div>
+	            </div>
+	        </div>
+	        <div class="layui-form-item">
+             	<div class="layui-inline">
+                    <label class="layui-form-label">URI</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="uri" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">IP</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ip" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+             </div>
+             <div class="layui-form-item">
+             	<div class="layui-inline">
+                    <label class="layui-form-label">请求头</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="header" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="userName" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+             </div>
+	        <div class="layui-form-item">
+	            <div class="layui-inline">
+                    <label class="layui-form-label">body</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="body" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">响应</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="resp" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+             </div>
+             <div class="layui-form-item">
+	            <div class="layui-inline">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="startTime" id="startTime" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="endTime" id="endTime" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+                </div>
+           	 </div>
+        </form>
+    </div>
+</fieldset>
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate;
+	
+	//日期
+    laydate.render({
+        elem: '#startTime'
+    });
+    laydate.render({
+        elem: '#endTime'
+    });
+    
+    init_data();
+    
+    function init_data(){
+    	$('select[name="appName"] option:eq(1)').attr('selected','selected');
+    	form.render();
+    }
+	
+	table.render({
+	    elem: '#tableData'
+	    ,method:'post'
+	    ,contentType:'application/json;charset=utf-8'
+	    ,url:'log/operLogList'
+		,height: 550
+	    ,cols: [[
+	      {field: 'traceId',title:'追踪id',fixed: 'left',width:100}
+	      ,{field:'appName', title:'应用',fixed: 'left',width:150}
+	      ,{field:'userName', title:'用户名',fixed: 'left',width:130}
+	      ,{field:'uri', title:'uri',width:180}
+	      ,{field:'module', title:'模块',width:100}
+	      ,{field:'action', title:'操作',width:100}
+	      ,{field:'createTime', title:'创建时间',width:180}
+	      ,{field:'header', title:'请求头',width:180}
+	      ,{field:'body', title:'body',width:180}
+	      ,{field:'resp', title:'响应',width:240}
+	      ,{field:'time', title:'耗时(ms)',width:100}
+	      ,{field:'desc', title:'描述'}
+	      ,{field:'os', title:'操作系统'}
+	      ,{field:'browser', title:'浏览器'}
+	      ,{field:'post', title:'isPost'}
+	      ,{field:'ip', title:'IP'}
+	    ]]
+	    ,where:{'appName':$('select[name="appName"]').val()}
+    	,request: {
+    	    pageName: 'pageNum' //页码的参数名称，默认：page
+    	    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+    	  }
+	    ,response: {
+	      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+	    }
+	    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+	    	if(res.success){
+		      return {
+		        "code": res.code, //解析接口状态
+		        "msg": res.msg, //解析提示文本
+		        "count": res.data.total, //解析数据长度
+		        "data": res.data.list //解析数据列表
+		      };
+	    	}
+	    }
+	    ,page: true
+	  });
+	
+	  //监听搜索操作
+      form.on('submit(data-search-btn)', function (data) {
+          //执行搜索重载
+          table.reload('tableData', {
+              page: {curr: 1}
+              , where: data.field
+          }, 'data');
+      });
+	
+}();
+</script>
+</body>
+</html>

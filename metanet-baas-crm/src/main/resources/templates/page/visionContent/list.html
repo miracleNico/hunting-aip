@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">内容名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="name" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">摘要</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="digest" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">关键词</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">行业</label>
+                    <div class="layui-input-inline">
+                        <select name="industry" id="industry" lay-searh="">
+                            <option value="">--请选择--</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">锻炼类型</label>
+                    <div class="layui-input-inline">
+                        <select name="type1" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">眼保健操</option>
+                            <option value="1">眼肌锻炼</option>
+                            <option value="2">眼球放松</option>
+                            <option value="3">新型眼操</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">锻炼模式</label>
+                    <div class="layui-input-inline">
+                        <select name="type2" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">自我监督模式</option>
+                            <option value="1">家长协助模式</option>
+                            <option value="2">医生协助模式</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">判定结果</label>
+                    <div class="layui-input-inline">
+                        <select name="type3" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">正常</option>
+                            <option value="1">警戒</option>
+                            <option value="2">危险</option>
+                            <option value="3">高危</option>
+                            <option value="4">其他异常</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">锻炼类型</label>
+                    <div class="layui-input-inline">
+                        <select name="type4" lay-search="">
+                            <option value="">--请选择--</option>
+                            <option value="0">原创</option>
+                            <option value="1">转载</option>
+                            <option value="2">翻译</option>
+                            <option value="3">其他</option>
+                        </select>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="layui-form-item">
+
+
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</fieldset>
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+
+<script type="text/html" id="tableToolbar">
+    <div class="layui-btn-container">
+        <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius" lay-event="tableDataAdd"
+                _permission="eyesArticle:add">添加
+        </button>
+        <button class="permission layui-hide layui-btn layui-btn-sm layui-btn-radius layui-btn-danger"
+                lay-event="tableDataRemove" _permission="eyesArticle:remove">删除
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="tableRowBar">
+    <a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius data-count-edit" lay-event="tableRowEdit"
+       _permission="eyesArticle:edit">修改</a>
+    <a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius layui-btn-danger data-count-delete"
+       lay-event="tableRowRemove" _permission="eyesArticle:remove">删除</a>
+</script>
+
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+    ;!function () {
+
+        var $ = layui.$, layer = layui.layer, table = layui.table, form = layui.form, laydate = layui.laydate;
+
+        table.render({
+            elem: '#tableData'
+            , method: 'post'
+            , contentType: 'application/json;charset=utf-8'
+            , url: 'api/eyesArticle/eyesArticleList'
+            , height: 550
+            , where : {'type1':-1,'type2':-1,'type3':-1,'type4':-1,'industry':-1}
+            , cols: [[
+                {type: 'checkbox', fixed: 'left'}
+                , {type: 'numbers', fixed: 'left'}
+                , {field: 'contentId', title: '内容ID',width:200}
+                , {field: 'name', title: '内容名称',width:100}
+                , {field: 'displayTitle', title: '显示标题', width: 160}
+                , {field: 'digest', title: '摘要', width: 120}
+                , {field: 'keyword', title: '关键词', width: 160}
+                , {field: 'industry', title: '行业', width: 160}
+                , {
+                    field: 'type1', title: '锻炼类型', width: 100, templet: function (data) {
+                        let type = '';
+                        switch (data.type1) {
+                            case 0 :
+                                type = '眼保健操';
+                                break;
+                            case 1 :
+                                type = '眼肌锻炼';
+                                break
+                            case 2 :
+                                type = '眼球放松'
+                                break
+                            case 3 :
+                                type = '新型眼操'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'type2', title: '锻炼模式', width: 160, templet: function (data) {
+                        let type = '';
+                        switch (data.type2) {
+                            case 0 :
+                                type = '自我监督模式';
+                                break;
+                            case 1 :
+                                type = '家长协助模式';
+                                break
+                            case 2 :
+                                type = '医生协助模式'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'type3', title: '判定结构', width: 160, templet: function (data) {
+                        let type = '';
+                        switch (data.type3) {
+                            case 0 :
+                                type = '正常';
+                                break;
+                            case 1 :
+                                type = '警戒';
+                                break
+                            case 2 :
+                                type = '危险'
+                                break
+                            case 3 :
+                                type = '高危'
+                                break
+                            case 4:
+                                type = '其他异常'
+                                break
+                            default:
+                                type = '未判定'
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'type4', title: '来源', width: 160, templet: function (data) {
+                        let type = '';
+                        switch (data.type4) {
+                            case -1 :
+                                type = '未知'
+                            case 0 :
+                                type = '原创';
+                                break;
+                            case 1 :
+                                type = '转载';
+                                break
+                            case 2 :
+                                type = '翻译'
+                                break
+                            case 3 :
+                                type = '其他'
+                                break
+                        }
+                        return '<span>' + type + '</span>'
+                    }
+                }
+                , {
+                    field: 'coverPictureUrl', title: '封面', width: 160, templet: function (d) {
+                        if ($.isEmptyObject(d.coverPictureUrl)) {
+                            return '';
+                        }
+                        return '<img src="' + d.coverPictureUrl + '" width="35px" height="35px" class="layui-upload-img" style="margin-left: 20px">';
+                    }
+                }
+                , {field: 'videoUrl', title: '视频地址', width: 200}
+                , {field: 'audioUrl', title: '音频地址', width: 160}
+                , {field: 'text', title: '文本内容', width: 200}
+                , {field: 'externalLink', title: '内容分享外链', width: 160}
+                , {field: 'remark', title: '备注', width: 100}
+                , {title: '操作', fixed: "right", width:120, align: "center", templet: '#tableRowBar'}
+            ]]
+            , request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            }
+            , parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                if (res.success) {
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.total, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            }
+            , page: true
+            , toolbar: '#tableToolbar' //开启头部工具栏，并为其绑定左侧模板
+            , done: function (res, curr, count) {
+                permission();
+            }
+        });
+
+        //监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            let type1 = $('select[name = "type1"]').val();
+            let type2 = $('select[name = "type2"]').val();
+            let type3 = $('select[name = "type3"]').val();
+            let type4 = $('select[name = "type4"]').val();
+            let industry = $('select[name = "industry"]').val();
+            if (type1 == null || type1 == '') {
+                data.field.type1 = -1;
+            }
+            if (type2 == null || type2 == '') {
+                data.field.type2 = -1;
+            }
+            if (type3 == null || type3 == '') {
+                data.field.type3 = -1;
+            }
+            if (type4 == null || type4 == '') {
+                data.field.type4 = -1;
+            }
+            if (industry == null || industry == '') {
+                data.field.industry = -1;
+            }
+            //执行搜索重载
+            table.reload('tableData', {
+                page: {curr: 1}
+                , where: data.field
+            }, 'data');
+        });
+
+
+        //头工具栏事件
+        table.on('toolbar(tableData)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            switch (obj.event) {
+                case 'tableDataAdd':
+                    console.log('tainjia')
+                    openIframeInsert('添加');
+                    break;
+                case 'tableDataRemove':
+                    removeTableRow(data);
+                    break;
+            }
+            ;
+        });
+
+        //监听表格行操作事件
+        table.on('tool(tableData)', function (obj) {
+            var data = obj.data;
+            console.log(data)
+            switch (obj.event) {
+                case 'tableRowEdit':
+                    openIframeUpdate('修改', data.contentId);
+                    break;
+                case 'tableRowRemove':
+                    removeTableRow(new Array(data));
+                    break;
+            }
+            ;
+        });
+
+        function openIframeInsert(title) {
+            openIframe(title, 'api/eyesArticle/toAdd')
+        }
+
+        function openIframeUpdate(title, contentId) {
+            openIframe(title, 'api/eyesArticle/editPage/', contentId)
+        }
+
+        function openIframe(title, url, contentId) {
+            var param = '';
+            if (!$.isEmptyObject(contentId)) {
+                param += contentId;
+            }
+            var index = layer.open({
+                type: 2,
+                title: title + '内容信息',
+                content: [url + param],//no没有滚动条
+                shade: 0.5,
+                maxmin: true, //开启最大化最小化按钮
+                area: ['100%', '100%']
+            });
+            layer.full(index);
+        }
+
+
+        function removeTableRow(data) {
+            if (data.length < 1) {
+                layer.msg('请选择您要删除的数据');
+                return;
+            }
+            layer.prompt({title: '输入口令，并确认', formType: 2}, function (pass, index) {
+                if (pass != confirmPwd()) {
+                    return layer.msg('口令不正确');
+                }
+                layer.close(index);
+                layer.confirm('确定要删除吗?', function () {
+                    $.ajax({
+                        url: '/api/eyesArticle/removeEyesArticle',
+                        type: 'POST',
+                        contentType: 'application/json;charset=utf-8',
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            if (res.success) {
+                                layer.msg(res.msg, table.reload('tableData'));
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+    }();
+</script>
+</body>
+</html>

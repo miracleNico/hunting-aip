@@ -1,0 +1,115 @@
+  
+server:
+  port: 8608
+  
+spring:
+   
+  #thymeleaf配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 300MB
+      max-request-size: 300MB
+  http:
+    encoding:
+      force: true
+  resources:
+    static-locations: classpath:/static/    
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    suffix: .html
+    encoding: UTF-8
+    servlet:
+      content-type: text/html 
+    mode: HTML
+    cache: false
+
+#放入file.conf中
+#seata:
+#  enabled: true
+#  application-id: ${spring.application.name}
+#  enable-auto-data-source-proxy: true
+#  use-jdk-proxy: false
+#  service:
+#    vgroupMapping:
+#      metanet-daas-vision-group: default
+#      grouplist:
+#        default: metanet-seata:8091
+#    disable-global-transaction: false
+#    enable-degrade: false
+#  config:
+#    type: nacos
+#    nacos:
+#      namespace:
+#      server-addr: metanet-nacos:8848
+#      group: SEATA_GROUP
+#      userName: "nacos"
+#      password: "nacos"
+#  registry:
+#    type: nacos
+#    nacos:
+#      application: seata-server
+#      server-addr: metanet-nacos:8848
+#      namespace:
+#      userName: "nacos"
+#      password: "nacos"
+      
+dubbo:
+  application:
+    #id: ${spring.application.name}-consumer
+    #name: ${spring.application.name}-consumer
+    qosEnable: false
+  cloud:
+    subscribed-services: metanet-daas-vision, metanet-daas-admin, metanet-daas-device, metanet-daas-user
+#  consumer:
+#    check: false
+  protocol:
+    id: dubbo
+    name: dubbo
+    port: -1
+  provider:
+    loadbalance: roundrobin
+    retries: 0
+    timeout: 60000
+    version: 1.0.0
+#  scan:
+#    base-packages: work.metanet.client.vision
+  registry:
+    id: ${spring.application.name}-registry
+    address: nacos://metanet-nacos:8848
+
+#元网专用配置
+lx: 
+  custom:
+    kafka:
+      topic:
+        operLog: kafka.topic.operLog.openapi
+    openapi:
+      sign:
+        enable: true
+        
+mapper:
+  identity: MYSQL
+  mappers: tk.mybatis.mapper.common.Mapper
+  not-empty: false
+  
+mybatis:
+  configuration:
+    call-setters-on-nulls: true
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+
+#腾讯配置
+tencent:
+  cloud:
+    accessKey: AKID2OZcTBcLxUze5Kf4OUKwTqjRtJUPfTcV
+    cos:
+      bucketName: ailoxi-devpb-1258463718
+      region: ap-guangzhou
+    secretKey: nYSChvue8MJB3g28B7sS1KNBpDLCnIad
+    sms:
+      appid: 1400384061
+      region: ap-guangzhou
+      
+      

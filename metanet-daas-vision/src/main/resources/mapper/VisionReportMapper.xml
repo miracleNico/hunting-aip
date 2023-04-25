@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="work.metanet.vision.dao.VisionReportMapper">
+
+    <select id="getVisionReportInfo"
+            resultType="work.metanet.api.vision.protocol.ReqVisionReportInfo$RespVisionReportInfo">
+        select
+        vr.test_id,
+        vr.judgement_result,
+        vr.decimal_record,
+        vr.logarithm_record,
+        vr.diopter_for_sph,
+        vr.diopter_for_cyl,
+        vr.corneal_diopter,
+        vr.crystal_diopter,
+        vr.axis_degrees_for_astigmatism,
+        vr.proposal,
+        vr.report_id,
+        vr.remark,
+        vr.create_time,
+        vr.update_time,
+        vr.status,
+        e.type
+        from t_vision_report vr
+        left join t_vision_test vt on vt.test_id=vr.test_id
+        left join t_eye e on e.eye_id=vt.eye_id
+        where 1=1
+        <if test="reportId!=null and reportId!=''">
+            and vr.report_id=#{reportId}
+        </if>
+        group by vr.report_id
+        limit 1000
+
+    </select>
+
+    <select id="getVisionReportList"
+            resultType="work.metanet.api.vision.protocol.ReqVisionReportList$RespVisionReportList">
+        select
+        vr.test_id,
+        vr.judgement_result,
+        vr.decimal_record,
+        vr.logarithm_record,
+        vr.diopter_for_sph,
+        vr.diopter_for_cyl,
+        vr.corneal_diopter,
+        vr.crystal_diopter,
+        vr.axis_degrees_for_astigmatism,
+        vr.proposal,
+        vr.report_id,
+        vr.remark,
+        vr.create_time,
+        vr.update_time,
+        vr.status
+        from t_vision_report vr
+        where 1=1
+        <if test="reportId!=null and reportId!=''">
+            and vr.report_id=#{reportId}
+        </if>
+        <if test="testId!=null and testId!=''">
+            and vr.test_id=#{testId}
+        </if>
+        group by vr.report_id
+
+    </select>
+
+    <select id="getTwelveVisionReport"
+            resultType="work.metanet.api.vision.protocol.ReqVisionReportList$RespVisionReportList">
+        select vr.test_id,
+               vr.judgement_result,
+               vr.decimal_record,
+               vr.logarithm_record,
+               vr.diopter_for_sph,
+               vr.diopter_for_cyl,
+               vr.corneal_diopter,
+               vr.crystal_diopter,
+               vr.axis_degrees_for_astigmatism,
+               vr.proposal,
+               vr.report_id,
+               vr.remark,
+               vr.create_time,
+               vr.update_time,
+               vr.status,
+               vt.eye_id,
+               vt.date_time,
+               vt.device_type,
+               vt.distance,
+               vt.env_light_intensity,
+               vt.time_duration,
+               vt.test_mode,
+               e.type
+        from t_vision_report vr
+                 left join t_vision_test vt on vt.test_id = vr.test_id
+                 left join t_eye e on e.eye_id = vt.eye_id
+        where 1 = 1
+        <if test="userId != null and userId != ''">
+            and e.user_id = #{userId}
+        </if>
+        <if test="type != null and type != -1">
+            and e.type = #{type}
+        </if>
+        group by vr.report_id
+        order by vr.create_time desc limit 12
+    </select>
+
+    <select id="searchVisionReport" resultType="work.metanet.api.vision.protocol.ReqVisionReportList$RespVisionReportList">
+        select
+        vr.test_id,
+        vr.judgement_result,
+        vr.decimal_record,
+        vr.logarithm_record,
+        vr.diopter_for_sph,
+        vr.diopter_for_cyl,
+        vr.corneal_diopter,
+        vr.crystal_diopter,
+        vr.axis_degrees_for_astigmatism,
+        vr.proposal,
+        vr.report_id,
+        vr.remark,
+        vr.create_time,
+        vr.update_time,
+        vr.status,
+        vt.eye_id,
+        vt.date_time,
+        vt.device_type,
+        vt.distance,
+        vt.env_light_intensity,
+        vt.time_duration,
+        vt.test_mode,
+        e.type
+        from t_vision_report vr
+        left join t_vision_test vt on vt.test_id=vr.test_id
+        left join t_eye e on e.eye_id=vt.eye_id
+        where 1=1
+        <if test="testMode!=null and testMode != -1">
+            and vt.test_mode=#{testMode}
+        </if>
+        <if test="deviceType!=null and deviceType != -1">
+            and vt.device_type=#{deviceType}
+        </if>
+        <if test="keyword!=null and keyword!=''">
+            and vr.proposal like CONCAT('%',#{keyword},'%')
+        </if>
+        <if test="userId!=null and userId!=''">
+            and e.user_id=#{userId}
+        </if>
+        <if test="ownerId!=null and ownerId!=''">
+            and e.owner_id=#{ownerId}
+        </if>
+        group by vr.report_id
+        order by vr.create_time
+    </select>
+
+    <select id="recommendVisionReport"
+            resultType="work.metanet.api.vision.protocol.ReqVisionReportList$RespVisionReportList">
+        select
+        vr.test_id,
+        vr.judgement_result,
+        vr.decimal_record,
+        vr.logarithm_record,
+        vr.diopter_for_sph,
+        vr.diopter_for_cyl,
+        vr.corneal_diopter,
+        vr.crystal_diopter,
+        vr.axis_degrees_for_astigmatism,
+        vr.proposal,
+        vr.report_id,
+        vr.remark,
+        vr.create_time,
+        vr.update_time,
+        vr.status,
+        vt.eye_id,
+        vt.date_time,
+        vt.device_type,
+        vt.distance,
+        vt.env_light_intensity,
+        vt.time_duration,
+        vt.test_mode
+        from t_vision_report vr
+        left join t_vision_test vt on vt.test_id=vr.test_id
+        left join t_eye e on e.eye_id=vt.eye_id
+        <if test="userId!=null and userId!=''">
+            left join (select TIMESTAMPDIFF(YEAR,birthday,NOW()) age from t_family_member where `status`=true and
+            join_user_id=#{userId} limit 1) ag on ag.age>=#{minAge} and #{maxAge}>=ag.age
+        </if>
+        where 1=1
+        and vt.test_mode=#{testMode}
+        and vr.judgement_result=#{judgementResult}
+        <if test="deviceType!=null">
+            and vt.device_type=#{deviceType}
+        </if>
+        <if test="minAge!=null and maxAge!=null">
+            and #{maxAge}>=ag.age
+            and ag.age>=#{minAge}
+        </if>
+        group by vr.report_id
+        order by null
+        <if test="userId!=null and userId!=''">
+            ,vt.test_mode desc,vt.judgement_result desc
+        </if>
+        <if test="random">
+            ,TRUNCATE(RAND(),4) desc
+        </if>
+    </select>
+
+    <insert id="insertVisionReport">
+        insert into t_vision_report (test_id,
+                                     judgement_result,
+                                     decimal_record,
+                                     logarithm_record,
+                                     proposal,
+                                     report_id,
+                                     remark)
+        values (#{testId},
+                #{judgementResult},
+                #{decimalRecord},
+                #{logarithmRecord},
+                #{proposal},
+                #{reportId},
+                #{remark})
+    </insert>
+
+    <update id="updateVisionReport">
+        update t_vision_report
+        set judgement_result=#{judgementResult},
+            decimal_record=#{decimalRecord},
+            logarithm_record=#{logarithmRecord},
+            proposal=#{proposal},
+            remark=#{remark}
+        where report_id = #{reportId}
+    </update>
+
+    <update id="removeVisionReport">
+        update t_vision_report set
+        status=false
+        where report_id in (
+        <foreach collection="list" item="item" separator=",">
+            #{item.reportId}
+        </foreach>
+        )
+    </update>
+    <select id="getVisionAVG" parameterType="work.metanet.api.vision.protocol.ReqVisionAVG"
+            resultType="work.metanet.api.vision.protocol.ReqVisionAVG$RespVisionAVG">
+        <include refid="last_week_eyes_vision_avg"/>
+        select rt.*, avg
+        from report_temp rt
+        left join
+        (select vr.test_id, avg(vr.logarithm_record) as avg,count(1),vr.report_id,vr.create_time ,te.user_id
+        from t_vision_report as vr
+        left join t_vision_test as vt
+        on vr.test_id = vt.test_id
+        left join t_eye as te on vt.eye_id = te.eye_id
+        where te.user_id = #{userId}
+        group by date (vr.create_time)) b
+        on date (rt.create_time) = date (b.create_time)
+        group by rt.create_time
+    </select>
+    <sql id="last_week_eyes_vision_avg">
+        drop table if exists report_temp;
+        create
+        temporary table report_temp (
+            user_id varchar(64) not null ,
+            create_time timestamp not null default current_timestamp
+            );
+        insert into report_temp (user_id, CREATE_TIME)
+        values (#{userId}, date_sub(curdate(), INTERVAL 0 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 1 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 2 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 3 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 4 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 5 DAY)),
+               (#{userId}, date_sub(curdate(), INTERVAL 6 DAY));
+    </sql>
+
+    <!--<select id="getVisionAVG" parameterType="work.metanet.api.vision.protocol.ReqVisionAVG"
+            resultType="work.metanet.api.vision.protocol.ReqVisionAVG$RespVisionAVG">
+        <![CDATA[
+        select ((a.logarithm_record + b.logarithm_record) / 2) as avg ,a.*
+            from (select * from t_vision_report where test_id in
+                    (select test_id
+                        from t_vision_test
+                        where eye_id =
+                        (select eye_id
+                            from t_eye
+                            where user_id = #{userId}
+                            and type = 0
+                            order by create_time
+                            desc limit 1 )
+                    group by date_format(create_time, '%Y-%m-%d')
+                    order by create_time desc)
+                and date_sub(current_date, INTERVAL 7 DAY) <= date (`create_time`)
+                group by date_format(create_time, '%Y-%m-%d')
+                order by date_format(create_time, '%Y-%m-%d') desc ) a,
+                (select *
+                    from t_vision_report
+                    where test_id in
+                        (select test_id
+                            from t_vision_test
+                            where eye_id =
+                                (select eye_id
+                                from t_eye
+                                where user_id = #{userId}
+                                and type = 1
+                                order by create_time desc limit 1 )
+                        group by date_format(create_time, '%Y-%m-%d')
+                        order by create_time desc)
+                    and date_sub(current_date, INTERVAL 7 DAY) <= date (`create_time`)
+                    group by date_format(create_time, '%Y-%m-%d')
+                    order by date_format(create_time, '%Y-%m-%d') desc ) b
+            where date_format(a.create_time, '%Y-%m-%d') = date_format(b.create_time, '%Y-%m-%d');
+        ]]>
+    </select>-->
+
+</mapper>

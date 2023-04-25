@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<base th:href="${#request.getContextPath()}+'/'">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css" media="all">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layuimini-search">
+    <legend>搜索信息</legend>
+    <div style="margin-left: 20px;margin-top: 10px" >
+        <form class="layui-form layui-form-pane" action="">
+        	<div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">订单号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="orderNumber" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">电话号码</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="phone" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">快递单号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="courierNumber" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">发货状态</label>
+                    <div class="layui-input-inline">
+                        <select name="sendStatus" lay-search="">
+                            <option value=""></option>
+                            <option value="NSEND">未发货</option>
+                            <option value="YSEND">已发货</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="startTime" id="startTime" autocomplete="off" class="layui-input" placeholder="创建时间">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="endTime" id="endTime" autocomplete="off" class="layui-input" placeholder="修改时间">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="remark" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-radius" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                    <button class="layui-btn layui-btn-radius layui-btn-primary" type="reset" >重置</button>
+                </div>
+           </div>
+        </form>
+    </div>
+</fieldset>
+<table class="layui-hide" id="tableData" lay-filter="tableData"></table>
+
+
+<!-- 
+<script type="text/html" id="tableToolbar">
+  <div class="layui-btn-container">
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger" lay-event="tableDataRemove">删除</button>
+  </div>
+</script> -->
+
+<script type="text/html" id="tableRowBar">
+	<a class="permission layui-hide layui-btn layui-btn-xs layui-btn-radius layui-bg-cyan" lay-event="tableRowTag" _permission="userScoreExchange:edit">标记</a>
+</script>
+
+<script src="lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="lib/layui/layui.all.js" charset="utf-8"></script>
+<script src="lib/common.js" charset="utf-8"></script>
+<script type="text/javascript" th:inline="none">
+;!function(){
+	
+	var $ = layui.$,layer = layui.layer,table = layui.table,form=layui.form,laydate = layui.laydate;
+	
+	//日期
+    laydate.render({
+        elem: '#startTime'
+    });
+    laydate.render({
+        elem: '#endTime'
+    });
+	
+	table.render({
+	    elem: '#tableData'
+	    ,method:'post'
+	    ,contentType:'application/json;charset=utf-8'
+	    ,url:'userScoreExchange/userScoreExchangeList'
+		,height: 550
+		//,totalRow: true
+	    ,cols: [[
+	       {type: 'checkbox', fixed: 'left'}
+	       ,{type: 'numbers',fixed: 'left'}
+	      ,{field:'userScoreExchangeId', title:'用户积分id',hide:true}
+	      ,{field:'orderNumber', title:'订单号',width:160,fixed: 'left'}
+	      ,{field:'prizeName', title:'奖品名称',width:100}
+	      ,{field:'prizeImg', title:'奖品图片',width:90, templet:function(d){
+	    	  if($.isEmptyObject(d.prizeImg)){
+	    		  return '';
+	    	  }
+	    	  return '<img src="'+d.prizeImg+'" width="35px" height="35px" class="layui-upload-img" style="margin-left: 20px">';
+	      }}
+	      ,{field:'score', title:'积分',width:70}
+	      ,{field:'consignee', title:'收货人',width:100}
+	      ,{field:'phone', title:'电话',width:120}
+	      ,{field:'province', title:'省',width:100}
+	      ,{field:'city', title:'市',width:100}
+	      ,{field:'county', title:'县',width:100}
+	      ,{field:'address', title:'详细地址',width:120}
+	      ,{field:'courierNumber', title:'快递单号',width:140}
+	      ,{field:'sendStatus', title:'发货状态',width:100,templet:function(d){
+	    	  var useColor = d.sendStatus=='YSEND'?'#5FB878':'#FF5722';
+	    	  var text = d.sendStatus=='YSEND'?'已发货':'未发货';
+	    	  return '<span style="color: '+useColor+'">'+text+'</span>';
+	      }}
+	      ,{field:'sendTime', title:'发货时间',width:160}
+	      ,{field:'createTime', title:'创建时间',width:160}
+	      ,{field:'updateTime', title:'修改时间',width:160}
+	      ,{field:'remark', title:'备注',width:180}
+	      ,{title: '操作', fixed: "right",width:100, align: "center", templet: '#tableRowBar'}
+	    ]]
+    	,request: {
+    	    pageName: 'pageNum' //页码的参数名称，默认：page
+    	    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+    	  }
+	    ,response: {
+	      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+	    }
+	    ,parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+	    	if(res.success){
+		      return {
+		        "code": res.code //解析接口状态
+		        ,"msg": res.msg //解析提示文本
+		        ,"count": res.data.total //解析数据长度
+		        ,"data": res.data.list //解析数据列表
+		        //,"totalRow":res.data.extra //解析汇总列
+		      };
+	    	}
+	    }
+	    ,page: true
+	    //,toolbar: '#tableToolbar' //开启头部工具栏，并为其绑定左侧模板
+	    ,done:function(res, curr, count){
+	    	permission();
+	    }
+	  });
+	
+	  //监听搜索操作
+      form.on('submit(data-search-btn)', function (data) {
+          //执行搜索重载
+          table.reload('tableData', {
+              page: {curr: 1}
+              , where: data.field
+          }, 'data');
+      });
+	  
+	  
+      //头工具栏事件
+      table.on('toolbar(tableData)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var data = checkStatus.data;
+        switch(obj.event){
+	        /**
+	          case 'tableDataAdd':
+	        	  openIframeEdit('添加');
+	          break;
+	          case 'tableDataEdit':
+	        	  if(data.length!=1){
+	        		  layer.msg('请选择一行您要修改的数据');
+	        		  return;
+	        	  }
+	        	  openIframeEdit('修改',data[0].userId);
+	          break;*/
+        };
+      });
+      
+      //监听表格行操作事件
+      table.on('tool(tableData)', function (obj) {
+          var data = obj.data;
+          switch(obj.event){
+	          case 'tableRowTag':
+	        	  openIframe('标记','userScoreExchange/editPage?userScoreExchangeId='+data.userScoreExchangeId);
+		      break;
+	      };
+      });
+      
+      function openIframe(title,url){
+    	  layer.open({
+	   		  	type: 2, 
+	   		  	title: title+'兑换信息',
+	   		  	content: [url,'no'],//no没有滚动条
+		   		shade: 0.5,
+		        maxmin: true, //开启最大化最小化按钮
+		        area: ['710px', '490px']
+	   		});
+      }
+	
+	/**
+      //监听行双击事件
+      table.on('rowDouble(tableData)', function(obj){
+        var data = obj.data;
+        //标注选中样式
+        obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+        openIframe('','user/infoPage?',data.userId);
+      });
+    */
+	
+}();
+</script>
+</body>
+</html>
